@@ -6,6 +6,14 @@
     "type": "module",
     "main": "dist/abstract_map_controller.js",
     "types": "dist/abstract_map_controller.d.ts",
+    "scripts": {
+        "build": "echo 'The build script is not yet configured.' && exit 1",
+        "test": "echo 'The test script is not yet configured.' && exit 1",
+        "lint": "biome lint --write",
+        "format": "biome format --write",
+        "check-lint": "biome lint",
+        "check-format": "biome format"
+    },
     "symfony": {
         "importmap": {
             "@hotwired/stimulus": "^3.0.0"

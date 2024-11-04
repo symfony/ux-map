@@ -5,6 +5,7 @@
 -   Add method `Symfony\UX\Map\Renderer\AbstractRenderer::tapOptions()`, to allow Renderer to modify options before rendering a Map.
 -   Add `ux_map.google_maps.default_map_id` configuration to set the Google ``Map ID``
 -   Add `ComponentWithMapTrait` to ease maps integration in [Live Components](https://symfony.com/bundles/ux-live-component/current/index.html)
+-   Add `Polyline` support
 
 ## 2.20
 

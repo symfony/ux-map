@@ -53,6 +53,13 @@ class MapFactoryTest extends TestCase
         $this->assertSame($array['polygons'][0]['title'], $polygons[0]['title']);
         $this->assertSame($array['polygons'][0]['infoWindow']['headerContent'], $polygons[0]['infoWindow']['headerContent']);
         $this->assertSame($array['polygons'][0]['infoWindow']['content'], $polygons[0]['infoWindow']['content']);
+
+        $this->assertCount(1, $polylines = $map->toArray()['polylines']);
+        $this->assertEquals($array['polylines'][0]['points'], $polylines[0]['points']);
+        $this->assertEquals($array['polylines'][0]['points'], $polylines[0]['points']);
+        $this->assertSame($array['polylines'][0]['title'], $polylines[0]['title']);
+        $this->assertSame($array['polylines'][0]['infoWindow']['headerContent'], $polylines[0]['infoWindow']['headerContent']);
+        $this->assertSame($array['polylines'][0]['infoWindow']['content'], $polylines[0]['infoWindow']['content']);
     }
 
     public function testToArrayFromArray(): void
@@ -154,6 +161,30 @@ class MapFactoryTest extends TestCase
         Map::fromArray($array);
     }
 
+    public function testFromArrayWithInvalidPolylines(): void
+    {
+        $array = self::createMapArray();
+        $array['polylines'] = 'invalid';
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('The "polylines" parameter must be an array.');
+        Map::fromArray($array);
+    }
+
+    public function testFromArrayWithInvalidPolyline(): void
+    {
+        $array = self::createMapArray();
+        $array['polylines'] = [
+            [
+                'invalid',
+            ],
+        ];
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('The "points" parameter is required.');
+        Map::fromArray($array);
+    }
+
     private static function createMapArray(): array
     {
         return [
@@ -195,6 +226,29 @@ class MapFactoryTest extends TestCase
                     'infoWindow' => [
                         'headerContent' => 'Polygon 1',
                         'content' => 'Polygon 1',
+                    ],
+                ],
+            ],
+            'polylines' => [
+                [
+                    'points' => [
+                        [
+                            'lat' => 48.858844,
+                            'lng' => 2.294351,
+                        ],
+                        [
+                            'lat' => 48.853,
+                            'lng' => 2.3499,
+                        ],
+                        [
+                            'lat' => 48.8566,
+                            'lng' => 2.3522,
+                        ],
+                    ],
+                    'title' => 'Polyline 1',
+                    'infoWindow' => [
+                        'headerContent' => 'Polyline 1',
+                        'content' => 'Polyline 1',
                     ],
                 ],
             ],

@@ -84,7 +84,7 @@ abstract readonly class AbstractRenderer implements RendererInterface
 
     private function getMapAttributes(Map $map): array
     {
-        $computeId = fn (array $array) => hash('xxh3', json_encode($array, JSON_THROW_ON_ERROR));
+        $computeId = fn (array $array) => hash('xxh3', json_encode($array, \JSON_THROW_ON_ERROR));
 
         $attrs = $map->toArray();
 
@@ -94,6 +94,10 @@ abstract readonly class AbstractRenderer implements RendererInterface
 
         foreach ($attrs['polygons'] as $key => $polygon) {
             $attrs['polygons'][$key]['@id'] = $computeId($polygon);
+        }
+
+        foreach ($attrs['polylines'] as $key => $polyline) {
+            $attrs['polylines'][$key]['@id'] = $computeId($polyline);
         }
 
         return $attrs;

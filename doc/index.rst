@@ -37,8 +37,17 @@ Configuration is done in your ``config/packages/ux_map.yaml`` file:
 
 The ``UX_MAP_DSN`` environment variable configure which renderer to use.
 
+Map renderers
+~~~~~~~~~~~~~
+
+The Symfony UX Map bundle supports multiple renderers. A map renderer is a
+service that provides the code and graphic assets required to render and 
+interact with a map in the browser. 
+
 Available renderers
 ~~~~~~~~~~~~~~~~~~~
+
+UX Map ships with two renderers: `Google Maps`_ and `Leaflet`_.
 
 ==============  ===============================================================
 Renderer
@@ -49,104 +58,173 @@ Renderer
                 **DSN**: ``UX_MAP_DSN=leaflet://default`` \
 ==============  ===============================================================
 
-Usage
------
+.. tip::
 
-Creating and rendering
-~~~~~~~~~~~~~~~~~~~~~~
+    Read the `Symfony UX Map Leaflet bridge docs`_ and the
+    `Symfony UX Map Google Maps brige docs`_ to learn about the configuration
+    options available for each renderer.
 
-A map is created by calling ``new Map()``. You can configure the center, zoom, and add markers::
+Create a map
+------------
+
+A map is created by calling ``new Map()``. You can configure the center, zoom, and add markers.
+Start by creating a new map instance::
     
-    namespace App\Controller;
-    
-    use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-    use Symfony\Component\HttpFoundation\Response;
-    use Symfony\Component\Routing\Attribute\Route;
-    use Symfony\UX\Map\InfoWindow;
     use Symfony\UX\Map\Map;
-    use Symfony\UX\Map\Marker;
+
+    // Create a new map instance
+    $myMap = (new Map());
+
+Center and zoom
+~~~~~~~~~~~~~~~
+
+You can set the center and zoom of the map using the ``center()`` and ``zoom()`` methods:
+
+    use Symfony\UX\Map\Map;
     use Symfony\UX\Map\Point;
     
-    final class HomeController extends AbstractController
-    {
-        #[Route('/')]
-        public function __invoke(): Response
-        {
-            // 1. Create a new map instance
-            $myMap = (new Map())
-                // Explicitly set the center and zoom
-                ->center(new Point(46.903354, 1.888334))
-                ->zoom(6)
-                // Or automatically fit the bounds to the markers
-                ->fitBoundsToMarkers()
-            ;
+    $myMap
     
-            // 2. You can add markers
-            $myMap
-                ->addMarker(new Marker(
-                    position: new Point(48.8566, 2.3522), 
-                    title: 'Paris'
-                ))
+        // Explicitly set the center and zoom
+        ->center(new Point(46.903354, 1.888334))
+        ->zoom(6)
+        
+        // Or automatically fit the bounds to the markers
+        ->fitBoundsToMarkers()
+    ;
 
-                // With an info window associated to the marker:
-                ->addMarker(new Marker(
-                    position: new Point(45.7640, 4.8357), 
-                    title: 'Lyon',
-                    infoWindow: new InfoWindow(
-                        headerContent: '<b>Lyon</b>',
-                        content: 'The French town in the historic Rhône-Alpes region, located at the junction of the Rhône and Saône rivers.'
-                    )
-                ))
+Add markers
+~~~~~~~~~~~
 
-                // You can also pass arbitrary data via the `extra` option in both the marker
-                // and the infoWindow; you can later use this data in your custom Stimulus controllers
-                ->addMarker(new Marker(
-                    // ...
-                    extra: [
-                        'icon_mask_url' => 'https://maps.gstatic.com/mapfiles/place_api/icons/v2/tree_pinlet.svg',
-                    ],
-                    infoWindow: new InfoWindow(
-                        // ...
-                        extra: [
-                            'num_items' => 3,
-                            'includes_link' => true,
-                        ],
-                    ),
-                )
-            ;
+You can add markers to a map using the ``addMarker()`` method:
 
-            // 3. You can also add Polygons, which represents an area enclosed by a series of `Point` instances
-            $myMap->addPolygon(new Polygon(
-                points: [
-                    new Point(48.8566, 2.3522),
-                    new Point(45.7640, 4.8357),
-                    new Point(43.2965, 5.3698),
-                    new Point(44.8378, -0.5792),
+    $myMap
+        ->addMarker(new Marker(
+            position: new Point(48.8566, 2.3522), 
+            title: 'Paris'
+        ))
+
+        // With an info window associated to the marker:
+        ->addMarker(new Marker(
+            position: new Point(45.7640, 4.8357), 
+            title: 'Lyon',
+            infoWindow: new InfoWindow(
+                headerContent: '<b>Lyon</b>',
+                content: 'The French town in the historic Rhône-Alpes region, located at the junction of the Rhône and Saône rivers.'
+            )
+        ))
+
+        // You can also pass arbitrary data via the `extra` option in both the marker
+        // and the infoWindow; you can later use this data in your custom Stimulus controllers
+        ->addMarker(new Marker(
+            // ...
+            extra: [
+                'icon_mask_url' => 'https://maps.gstatic.com/mapfiles/place_api/icons/v2/tree_pinlet.svg',
+            ],
+            infoWindow: new InfoWindow(
+                // ...
+                extra: [
+                    'num_items' => 3,
+                    'includes_link' => true,
                 ],
-                infoWindow: new InfoWindow(
-                    content: 'Paris, Lyon, Marseille, Bordeaux',
-                ),
-            ));
+            ),
+        )
+    ;
 
-            // 4. And inject the map in your template to render it
-            return $this->render('contact/index.html.twig', [
-                'my_map' => $myMap,
-            ]);
-        }
-    }
+Add Polygons
+~~~~~~~~~~~~
+
+You can also add Polygons, which represents an area enclosed by a series of ``Point`` instances:
+
+    $myMap->addPolygon(new Polygon(
+        points: [
+            new Point(48.8566, 2.3522),
+            new Point(45.7640, 4.8357),
+            new Point(43.2965, 5.3698),
+            new Point(44.8378, -0.5792),
+        ],
+        infoWindow: new InfoWindow(
+            content: 'Paris, Lyon, Marseille, Bordeaux',
+        ),
+    ));
+
+Render a map
+------------
 
 To render a map in your Twig template, use the ``ux_map`` Twig function, e.g.:
 
+To be visible, the map must have a defined height:
+
 .. code-block:: twig
 
-    {# to be visible, the map must have a defined height #}
     {{ ux_map(my_map, { style: 'height: 300px' }) }}
 
-    {# you can add custom HTML attributes too #}
+You can add custom HTML attributes too:
+
+.. code-block:: twig
+
     {{ ux_map(my_map, { style: 'height: 300px', id: 'events-map', class: 'mb-3' }) }}
 
-Extend the default behavior
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Twig Function ``ux_map()``
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``ux_map()`` Twig function allows you to create and render a map in your Twig 
+templates. The function accepts the same arguments as the ``Map`` class:
+
+.. code-block:: html+twig
+
+    {{ ux_map(
+        center: [51.5074, 0.1278],
+        zoom: 3,
+        markers: [
+            { position: [51.5074, 0.1278], title: 'London' },
+            { position: [48.8566, 2.3522], title: 'Paris' },
+            {
+                position: [40.7128, -74.0060],
+                title: 'New York',
+                infoWindow: { content: 'Welcome to <b>New York</b>' }
+            },
+        ],
+        attributes: {
+            class: 'foo',
+            style: 'height: 800px; width: 100%; border: 4px solid red; margin-block: 10vh;',
+        }
+    ) }}
+
+Twig Component ``<twig:ux:map />``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Alternatively, you can use the ``<twig:ux:map />`` component.
+
+.. code-block:: html+twig
+
+    <twig:ux:map
+        center="[51.5074, 0.1278]"
+        zoom="3"
+        markers='[
+            {"position": [51.5074, 0.1278], "title": "London"},
+            {"position": [48.8566, 2.3522], "title": "Paris"},
+            {
+                "position": [40.7128, -74.0060],
+                "title": "New York",
+                "infoWindow": {"content": "Welcome to <b>New York</b>"}
+            }
+        ]'
+        attributes='{
+            "class": "foo",
+            "style": "height: 800px; width: 100%; border: 4px solid red; margin-block: 10vh;"
+        }'
+    />
+
+The ``<twig:ux:map />`` component requires the `Twig Component`_ package.
+
+.. code-block:: terminal
+
+    $ composer require symfony/ux-twig-component
+
+Interact with the map
+~~~~~~~~~~~~~~~~~~~~~
 
 Symfony UX Map allows you to extend its default behavior using a custom Stimulus controller:
 
@@ -219,17 +297,18 @@ Symfony UX Map allows you to extend its default behavior using a custom Stimulus
         }
     }
 
-.. tip::
-
-    Read the `Symfony UX Map Leaflet bridge docs`_ and the
-    `Symfony UX Map Google Maps brige docs`_ to learn about the exact code
-    needed to customize the markers.
 
 Then, you can use this controller in your template:
 
 .. code-block:: twig
     
     {{ ux_map(my_map, { 'data-controller': 'mymap', style: 'height: 300px' }) }}
+
+.. tip::
+
+    Read the `Symfony UX Map Leaflet bridge docs`_ and the
+    `Symfony UX Map Google Maps brige docs`_ to learn about the exact code
+    needed to customize the markers.
 
 Backward Compatibility promise
 ------------------------------

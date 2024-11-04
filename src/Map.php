@@ -35,6 +35,11 @@ final class Map
          * @var array<Polygon>
          */
         private array $polygons = [],
+
+        /**
+         * @var array<Polyline>
+         */
+        private array $polylines = [],
     ) {
     }
 
@@ -95,6 +100,13 @@ final class Map
         return $this;
     }
 
+    public function addPolyline(Polyline $polyline): self
+    {
+        $this->polylines[] = $polyline;
+
+        return $this;
+    }
+
     public function toArray(): array
     {
         if (!$this->fitBoundsToMarkers) {
@@ -114,6 +126,7 @@ final class Map
             'options' => $this->options ? MapOptionsNormalizer::normalize($this->options) : [],
             'markers' => array_map(static fn (Marker $marker) => $marker->toArray(), $this->markers),
             'polygons' => array_map(static fn (Polygon $polygon) => $polygon->toArray(), $this->polygons),
+            'polylines' => array_map(static fn (Polyline $polyline) => $polyline->toArray(), $this->polylines),
         ];
     }
 
@@ -123,6 +136,7 @@ final class Map
      *     zoom?: float,
      *     markers?: list<array>,
      *     polygons?: list<array>,
+     *     polylines?: list<array>,
      *     fitBoundsToMarkers?: bool,
      *     options?: array<string, mixed>,
      * } $map
@@ -156,6 +170,12 @@ final class Map
             throw new InvalidArgumentException('The "polygons" parameter must be an array.');
         }
         $map['polygons'] = array_map(Polygon::fromArray(...), $map['polygons']);
+
+        $map['polylines'] ??= [];
+        if (!\is_array($map['polylines'])) {
+            throw new InvalidArgumentException('The "polylines" parameter must be an array.');
+        }
+        $map['polylines'] = array_map(Polyline::fromArray(...), $map['polylines']);
 
         return new self(...$map);
     }

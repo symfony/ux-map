@@ -18,6 +18,7 @@ use Symfony\UX\Map\Map;
 use Symfony\UX\Map\Marker;
 use Symfony\UX\Map\Point;
 use Symfony\UX\Map\Polygon;
+use Symfony\UX\Map\Polyline;
 
 class MapTest extends TestCase
 {
@@ -66,6 +67,7 @@ class MapTest extends TestCase
             'options' => $array['options'],
             'markers' => [],
             'polygons' => [],
+            'polylines' => [],
         ], $array);
     }
 
@@ -85,6 +87,7 @@ class MapTest extends TestCase
             'options' => $array['options'],
             'markers' => [],
             'polygons' => [],
+            'polylines' => [],
         ], $array);
     }
 
@@ -131,6 +134,30 @@ class MapTest extends TestCase
                 infoWindow: new InfoWindow(
                     headerContent: '<b>Polygon 2</b>',
                     content: 'A polygon around Lyon with some additional info.',
+                    position: new Point(45.764, 4.8357),
+                    opened: true,
+                    autoClose: true,
+                ),
+            ))
+            ->addPolyline(new Polyline(
+                points: [
+                    new Point(48.858844, 2.294351),
+                    new Point(48.853, 2.3499),
+                    new Point(48.8566, 2.3522),
+                ],
+                title: 'Polyline 1',
+                infoWindow: null,
+            ))
+            ->addPolyline(new Polyline(
+                points: [
+                    new Point(45.764043, 4.835659),
+                    new Point(45.75, 4.85),
+                    new Point(45.77, 4.82),
+                ],
+                title: 'Polyline 2',
+                infoWindow: new InfoWindow(
+                    headerContent: '<b>Polyline 2</b>',
+                    content: 'A polyline around Lyon with some additional info.',
                     position: new Point(45.764, 4.8357),
                     opened: true,
                     autoClose: true,
@@ -209,6 +236,35 @@ class MapTest extends TestCase
                     'infoWindow' => [
                         'headerContent' => '<b>Polygon 2</b>',
                         'content' => 'A polygon around Lyon with some additional info.',
+                        'position' => ['lat' => 45.764, 'lng' => 4.8357],
+                        'opened' => true,
+                        'autoClose' => true,
+                        'extra' => [],
+                    ],
+                    'extra' => [],
+                ],
+            ],
+            'polylines' => [
+                [
+                    'points' => [
+                        ['lat' => 48.858844, 'lng' => 2.294351],
+                        ['lat' => 48.853, 'lng' => 2.3499],
+                        ['lat' => 48.8566, 'lng' => 2.3522],
+                    ],
+                    'title' => 'Polyline 1',
+                    'infoWindow' => null,
+                    'extra' => [],
+                ],
+                [
+                    'points' => [
+                        ['lat' => 45.764043, 'lng' => 4.835659],
+                        ['lat' => 45.75, 'lng' => 4.85],
+                        ['lat' => 45.77, 'lng' => 4.82],
+                    ],
+                    'title' => 'Polyline 2',
+                    'infoWindow' => [
+                        'headerContent' => '<b>Polyline 2</b>',
+                        'content' => 'A polyline around Lyon with some additional info.',
                         'position' => ['lat' => 45.764, 'lng' => 4.8357],
                         'opened' => true,
                         'autoClose' => true,

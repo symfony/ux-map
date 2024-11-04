@@ -33,6 +33,13 @@ final readonly class Polygon
 
     /**
      * Convert the polygon to an array representation.
+     *
+     * @return array{
+     *     points: array<array{lat: float, lng: float}>,
+     *     title: string|null,
+     *     infoWindow: array<string, mixed>|null,
+     *     extra: array,
+     * }
      */
     public function toArray(): array
     {
@@ -49,7 +56,7 @@ final readonly class Polygon
      *     points: array<array{lat: float, lng: float}>,
      *     title: string|null,
      *     infoWindow: array<string, mixed>|null,
-     *     extra: object,
+     *     extra: array,
      * } $polygon
      *
      * @internal

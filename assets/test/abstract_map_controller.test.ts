@@ -35,12 +35,24 @@ class MyMapController extends AbstractMapController {
         return polygon;
     }
 
+    doCreatePolyline(definition) {
+        const polyline = { polyline: 'polyline', title: definition.title };
+
+        if (definition.infoWindow) {
+            this.createInfoWindow({ definition: definition.infoWindow, element: polyline });
+        }
+        return polyline;
+    }
+
     doCreateInfoWindow({ definition, element }) {
         if (element.marker) {
             return { infoWindow: 'infoWindow', headerContent: definition.headerContent, marker: element.title };
         }
         if (element.polygon) {
             return { infoWindow: 'infoWindow', headerContent: definition.headerContent, polygon: element.title };
+        }
+        if (element.polyline) {
+            return { infoWindow: 'infoWindow', headerContent: definition.headerContent, polyline: element.title };
         }
     }
 
@@ -70,6 +82,7 @@ describe('AbstractMapController', () => {
                 data-map-options-value="{}" 
                 data-map-markers-value="[{&quot;position&quot;:{&quot;lat&quot;:48.8566,&quot;lng&quot;:2.3522},&quot;title&quot;:&quot;Paris&quot;,&quot;infoWindow&quot;:{&quot;headerContent&quot;:&quot;Paris&quot;,&quot;content&quot;:null,&quot;position&quot;:null,&quot;opened&quot;:false,&quot;autoClose&quot;:true,&quot;extra&quot;:[]},&quot;extra&quot;:[],&quot;@id&quot;:&quot;a69f13edd2e571f3&quot;},{&quot;position&quot;:{&quot;lat&quot;:45.75,&quot;lng&quot;:4.85},&quot;title&quot;:&quot;Lyon&quot;,&quot;infoWindow&quot;:{&quot;headerContent&quot;:&quot;Lyon&quot;,&quot;content&quot;:null,&quot;position&quot;:null,&quot;opened&quot;:false,&quot;autoClose&quot;:true,&quot;extra&quot;:[]},&quot;extra&quot;:[],&quot;@id&quot;:&quot;cb9c1a30d562694b&quot;},{&quot;position&quot;:{&quot;lat&quot;:43.6047,&quot;lng&quot;:1.4442},&quot;title&quot;:&quot;Toulouse&quot;,&quot;infoWindow&quot;:{&quot;headerContent&quot;:&quot;Toulouse&quot;,&quot;content&quot;:null,&quot;position&quot;:null,&quot;opened&quot;:false,&quot;autoClose&quot;:true,&quot;extra&quot;:[]},&quot;extra&quot;:[],&quot;@id&quot;:&quot;e6b3acef1325fb52&quot;}]" 
                 data-map-polygons-value="[{&quot;points&quot;:[{&quot;lat&quot;:48.8566,&quot;lng&quot;:2.3522},{&quot;lat&quot;:45.75,&quot;lng&quot;:4.85},{&quot;lat&quot;:43.6047,&quot;lng&quot;:1.4442}],&quot;title&quot;:null,&quot;infoWindow&quot;:null,&quot;extra&quot;:[],&quot;@id&quot;:&quot;228ae6f5c1b17cfd&quot;},{&quot;points&quot;:[{&quot;lat&quot;:1.4442,&quot;lng&quot;:43.6047},{&quot;lat&quot;:4.85,&quot;lng&quot;:45.75},{&quot;lat&quot;:2.3522,&quot;lng&quot;:48.8566}],&quot;title&quot;:null,&quot;infoWindow&quot;:{&quot;headerContent&quot;:&quot;Polygon&quot;,&quot;content&quot;:null,&quot;position&quot;:null,&quot;opened&quot;:false,&quot;autoClose&quot;:true,&quot;extra&quot;:{&quot;foo&quot;:&quot;bar&quot;}},&quot;extra&quot;:{&quot;fillColor&quot;:&quot;#ff0000&quot;},&quot;@id&quot;:&quot;9874334e4e8caa16&quot;}]" 
+                data-map-polylines-value="[{&quot;points&quot;:[{&quot;lat&quot;:48.1173,&quot;lng&quot;:-1.6778},{&quot;lat&quot;:48.8566,&quot;lng&quot;:2.3522},{&quot;lat&quot;:48.2082,&quot;lng&quot;:16.3738}],&quot;title&quot;:null,&quot;infoWindow&quot;:{&quot;headerContent&quot;:&quot;Polyline&quot;,&quot;content&quot;:null,&quot;position&quot;:null,&quot;opened&quot;:false,&quot;autoClose&quot;:true,&quot;extra&quot;:{&quot;foo&quot;:&quot;bar&quot;}},&quot;extra&quot;:{&quot;strokeColor&quot;:&quot;#ff0000&quot;},&quot;@id&quot;:&quot;0fa955da866c7720&quot;}]"
                 style="height: 600px"
             ></div>
         `);
@@ -79,7 +92,7 @@ describe('AbstractMapController', () => {
         clearDOM();
     });
 
-    it('connect and create map, marker, polygon and info window', async () => {
+    it('connect and create map, marker, polygon, polyline and info window', async () => {
         const div = getByTestId(container, 'map');
         expect(div).not.toHaveClass('connected');
 
@@ -101,6 +114,9 @@ describe('AbstractMapController', () => {
                 ['9874334e4e8caa16', { '@id': '9874334e4e8caa16', polygon: 'polygon', title: null }],
             ])
         );
+        expect(controller.polylines).toEqual(
+            new Map([['0fa955da866c7720', { '@id': '0fa955da866c7720', polyline: 'polyline', title: null }]])
+        );
         expect(controller.infoWindows).toEqual([
             {
                 headerContent: 'Paris',
@@ -121,6 +137,11 @@ describe('AbstractMapController', () => {
                 headerContent: 'Polygon',
                 infoWindow: 'infoWindow',
                 polygon: null,
+            },
+            {
+                headerContent: 'Polyline',
+                infoWindow: 'infoWindow',
+                polyline: null,
             },
         ]);
     });

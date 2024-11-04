@@ -153,6 +153,24 @@ You can also add Polygons, which represents an area enclosed by a series of ``Po
         ),
     ));
 
+Add Polylines
+~~~~~~~~~~~~~
+
+You can add Polylines, which represents a path made by a series of ``Point`` instances::
+
+    $myMap->addPolyline(new Polyline(
+        points: [
+            new Point(48.8566, 2.3522),
+            new Point(45.7640, 4.8357),
+            new Point(43.2965, 5.3698),
+            new Point(44.8378, -0.5792),
+        ],
+        infoWindow: new InfoWindow(
+            content: 'A line passing through Paris, Lyon, Marseille, Bordeaux',
+        ),
+    ));
+
+
 Render a map
 ------------
 

@@ -29,6 +29,15 @@ export type PolygonDefinition<PolygonOptions, InfoWindowOptions> = {
     extra: Record<string, unknown>;
 };
 
+export type PolylineDefinition<PolylineOptions, InfoWindowOptions> = {
+    '@id': string;
+    infoWindow?: Omit<InfoWindowDefinition<InfoWindowOptions>, 'position'>;
+    points: Array<Point>;
+    title: string | null;
+    rawOptions?: PolylineOptions;
+    extra: Record<string, unknown>;
+};
+
 export type InfoWindowDefinition<InfoWindowOptions> = {
     headerContent: string | null;
     content: string | null;
@@ -58,6 +67,8 @@ export default abstract class<
     InfoWindow,
     PolygonOptions,
     Polygon,
+    PolylineOptions,
+    Polyline,
 > extends Controller<HTMLElement> {
     static values = {
         providerOptions: Object,
@@ -66,6 +77,7 @@ export default abstract class<
         fitBoundsToMarkers: Boolean,
         markers: Array,
         polygons: Array,
+        polylines: Array,
         options: Object,
     };
 
@@ -74,12 +86,14 @@ export default abstract class<
     declare fitBoundsToMarkersValue: boolean;
     declare markersValue: Array<MarkerDefinition<MarkerOptions, InfoWindowOptions>>;
     declare polygonsValue: Array<PolygonDefinition<PolygonOptions, InfoWindowOptions>>;
+    declare polylinesValue: Array<PolylineDefinition<PolylineOptions, InfoWindowOptions>>;
     declare optionsValue: MapOptions;
 
     protected map: Map;
     protected markers = new Map<Marker>();
     protected infoWindows: Array<InfoWindow> = [];
     protected polygons = new Map<Polygon>();
+    protected polylines = new Map<Polyline>();
 
     connect() {
         const options = this.optionsValue;
@@ -92,6 +106,8 @@ export default abstract class<
 
         this.polygonsValue.forEach((polygon) => this.createPolygon(polygon));
 
+        this.polylinesValue.forEach((polyline) => this.createPolyline(polyline));
+
         if (this.fitBoundsToMarkersValue) {
             this.doFitBoundsToMarkers();
         }
@@ -100,6 +116,7 @@ export default abstract class<
             map: this.map,
             markers: [...this.markers.values()],
             polygons: [...this.polygons.values()],
+            polylines: [...this.polylines.values()],
             infoWindows: this.infoWindows,
         });
     }
@@ -142,17 +159,36 @@ export default abstract class<
         return polygon;
     }
 
+    protected abstract removePolygon(polygon: Polygon): void;
+
     protected abstract doCreatePolygon(definition: PolygonDefinition<PolygonOptions, InfoWindowOptions>): Polygon;
+
+    public createPolyline(definition: PolylineDefinition<PolylineOptions, InfoWindowOptions>): Polyline {
+        this.dispatchEvent('polyline:before-create', { definition });
+        const polyline = this.doCreatePolyline(definition);
+        this.dispatchEvent('polyline:after-create', { polyline });
+
+        polyline['@id'] = definition['@id'];
+
+        this.polylines.set(definition['@id'], polyline);
+
+        return polyline;
+    }
+
+    protected abstract removePolyline(polyline: Polyline): void;
+
+    protected abstract doCreatePolyline(definition: PolylineDefinition<PolylineOptions, InfoWindowOptions>): Polyline;
 
     protected createInfoWindow({
         definition,
         element,
-    }: {
-        definition:
-            | MarkerDefinition<MarkerOptions, InfoWindowOptions>['infoWindow']
-            | PolygonDefinition<PolygonOptions, InfoWindowOptions>['infoWindow'];
-        element: Marker | Polygon;
-    }): InfoWindow {
+    }:
+        | { definition: MarkerDefinition<MarkerOptions, InfoWindowOptions>['infoWindow']; element: Marker }
+        | { definition: PolygonDefinition<PolygonOptions, InfoWindowOptions>['infoWindow']; element: Polygon }
+        | {
+              definition: PolylineDefinition<PolylineOptions, InfoWindowOptions>['infoWindow'];
+              element: Polyline;
+          }): InfoWindow {
         this.dispatchEvent('info-window:before-create', { definition, element });
         const infoWindow = this.doCreateInfoWindow({ definition, element });
         this.dispatchEvent('info-window:after-create', { infoWindow, element });
@@ -166,13 +202,11 @@ export default abstract class<
         definition,
         element,
     }:
+        | { definition: MarkerDefinition<MarkerOptions, InfoWindowOptions>['infoWindow']; element: Marker }
+        | { definition: PolygonDefinition<PolygonOptions, InfoWindowOptions>['infoWindow']; element: Polygon }
         | {
-              definition: MarkerDefinition<MarkerOptions, InfoWindowOptions>['infoWindow'];
-              element: Marker;
-          }
-        | {
-              definition: PolygonDefinition<PolygonOptions, InfoWindowOptions>['infoWindow'];
-              element: Polygon;
+              definition: PolylineDefinition<PolylineOptions, InfoWindowOptions>['infoWindow'];
+              element: Polyline;
           }): InfoWindow;
 
     protected abstract doFitBoundsToMarkers(): void;
@@ -213,7 +247,7 @@ export default abstract class<
 
         this.polygons.forEach((polygon) => {
             if (!this.polygonsValue.find((p) => p['@id'] === polygon['@id'])) {
-                polygon.remove();
+                this.removePolygon(polygon);
                 this.polygons.delete(polygon['@id']);
             }
         });
@@ -221,6 +255,25 @@ export default abstract class<
         this.polygonsValue.forEach((polygon) => {
             if (!this.polygons.has(polygon['@id'])) {
                 this.createPolygon(polygon);
+            }
+        });
+    }
+
+    public polylinesValueChanged(): void {
+        if (!this.map) {
+            return;
+        }
+
+        this.polylines.forEach((polyline) => {
+            if (!this.polylinesValue.find((p) => p['@id'] === polyline['@id'])) {
+                this.removePolyline(polyline);
+                this.polylines.delete(polyline['@id']);
+            }
+        });
+
+        this.polylinesValue.forEach((polyline) => {
+            if (!this.polylines.has(polyline['@id'])) {
+                this.createPolyline(polyline);
             }
         });
     }

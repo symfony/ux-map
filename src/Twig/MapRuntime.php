@@ -15,6 +15,7 @@ use Symfony\UX\Map\Map;
 use Symfony\UX\Map\Marker;
 use Symfony\UX\Map\Point;
 use Symfony\UX\Map\Polygon;
+use Symfony\UX\Map\Polyline;
 use Symfony\UX\Map\Renderer\RendererInterface;
 use Twig\Extension\RuntimeExtensionInterface;
 
@@ -34,12 +35,14 @@ final class MapRuntime implements RuntimeExtensionInterface
      * @param array<string, mixed> $attributes
      * @param array<string, mixed> $markers
      * @param array<string, mixed> $polygons
+     * @param array<string, mixed> $polylines
      */
     public function renderMap(
         ?Map $map = null,
         array $attributes = [],
         ?array $markers = null,
         ?array $polygons = null,
+        ?array $polylines = null,
         ?array $center = null,
         ?float $zoom = null,
     ): string {
@@ -55,8 +58,11 @@ final class MapRuntime implements RuntimeExtensionInterface
         foreach ($markers ?? [] as $marker) {
             $map->addMarker(Marker::fromArray($marker));
         }
-        foreach ($polygons ?? [] as $polygons) {
-            $map->addPolygon(Polygon::fromArray($polygons));
+        foreach ($polygons ?? [] as $polygon) {
+            $map->addPolygon(Polygon::fromArray($polygon));
+        }
+        foreach ($polylines ?? [] as $polyline) {
+            $map->addPolyline(Polyline::fromArray($polyline));
         }
         if (null !== $center) {
             $map->center(Point::fromArray($center));
@@ -70,7 +76,7 @@ final class MapRuntime implements RuntimeExtensionInterface
 
     public function render(array $args = []): string
     {
-        $map = array_intersect_key($args, ['map' => 0, 'markers' => 0, 'polygons' => 0, 'center' => 1, 'zoom' => 2]);
+        $map = array_intersect_key($args, ['map' => 0, 'markers' => 1, 'polygons' => 2, 'polylines' => 3, 'center' => 4, 'zoom' => 5]);
         $attributes = array_diff_key($args, $map);
 
         return $this->renderMap(...$map, attributes: $attributes);

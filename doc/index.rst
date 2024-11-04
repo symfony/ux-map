@@ -78,13 +78,12 @@ Start by creating a new map instance::
 Center and zoom
 ~~~~~~~~~~~~~~~
 
-You can set the center and zoom of the map using the ``center()`` and ``zoom()`` methods:
+You can set the center and zoom of the map using the ``center()`` and ``zoom()`` methods::
 
     use Symfony\UX\Map\Map;
     use Symfony\UX\Map\Point;
     
     $myMap
-    
         // Explicitly set the center and zoom
         ->center(new Point(46.903354, 1.888334))
         ->zoom(6)
@@ -96,7 +95,7 @@ You can set the center and zoom of the map using the ``center()`` and ``zoom()``
 Add markers
 ~~~~~~~~~~~
 
-You can add markers to a map using the ``addMarker()`` method:
+You can add markers to a map using the ``addMarker()`` method::
 
     $myMap
         ->addMarker(new Marker(
@@ -134,7 +133,7 @@ You can add markers to a map using the ``addMarker()`` method:
 Add Polygons
 ~~~~~~~~~~~~
 
-You can also add Polygons, which represents an area enclosed by a series of ``Point`` instances:
+You can also add Polygons, which represents an area enclosed by a series of ``Point`` instances::
 
     $myMap->addPolygon(new Polygon(
         points: [

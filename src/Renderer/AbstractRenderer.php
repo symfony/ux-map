@@ -31,6 +31,18 @@ abstract readonly class AbstractRenderer implements RendererInterface
 
     abstract protected function getDefaultMapOptions(): MapOptionsInterface;
 
+    /**
+     * @template T of MapOptionsInterface
+     *
+     * @param T $options
+     *
+     * @return T
+     */
+    protected function tapOptions(MapOptionsInterface $options): MapOptionsInterface
+    {
+        return $options;
+    }
+
     final public function renderMap(Map $map, array $attributes = []): string
     {
         if (!$map->hasOptions()) {
@@ -38,6 +50,8 @@ abstract readonly class AbstractRenderer implements RendererInterface
         } elseif (!$map->getOptions() instanceof ($defaultMapOptions = $this->getDefaultMapOptions())) {
             $map->options($defaultMapOptions);
         }
+
+        $map->options($this->tapOptions($map->getOptions()));
 
         $controllers = [];
         if ($attributes['data-controller'] ?? null) {

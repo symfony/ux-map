@@ -44,6 +44,12 @@ final class UXMapBundle extends AbstractBundle
         $rootNode
             ->children()
                 ->scalarNode('renderer')->defaultNull()->end()
+                ->arrayNode('google_maps')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->scalarNode('default_map_id')->defaultNull()->end()
+                    ->end()
+                ->end()
             ->end()
         ;
     }
@@ -75,9 +81,17 @@ final class UXMapBundle extends AbstractBundle
         foreach (self::$bridges as $name => $bridge) {
             if (ContainerBuilder::willBeAvailable('symfony/ux-'.$name.'-map', $bridge['renderer_factory'], ['symfony/ux-map'])) {
                 $container->services()
-                    ->set('ux_map.renderer_factory.'.$name, $bridge['renderer_factory'])
+                    ->set($rendererFactoryName = 'ux_map.renderer_factory.'.$name, $bridge['renderer_factory'])
                     ->parent('ux_map.renderer_factory.abstract')
                     ->tag('ux_map.renderer_factory');
+
+                if ('google' === $name) {
+                    $container->services()
+                        ->get($rendererFactoryName)
+                        ->args([
+                            '$defaultMapId' => $config['google_maps']['default_map_id'],
+                        ]);
+                }
             }
         }
     }

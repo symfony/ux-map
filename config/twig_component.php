@@ -12,8 +12,6 @@
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use Symfony\UX\Map\Twig\UXMapComponent;
-use Symfony\UX\Map\Twig\UXMapComponentListener;
-use Symfony\UX\TwigComponent\Event\PreCreateForRenderEvent;
 
 return static function (ContainerConfigurator $container): void {
     $container->services()

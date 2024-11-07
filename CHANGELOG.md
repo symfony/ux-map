@@ -1,4 +1,9 @@
 # CHANGELOG
+ 
+## 2.22
+
+-   Add method `Symfony\UX\Map\Renderer\AbstractRenderer::tapOptions()`, to allow Renderer to modify options before rendering a Map.
+-   Add `ux_map.google_maps.default_map_id` configuration to set the Google ``Map ID``
 
 ## 2.20
 

@@ -34,6 +34,12 @@ Configuration is done in your ``config/packages/ux_map.yaml`` file:
     # config/packages/ux_map.yaml
     ux_map:
         renderer: '%env(resolve:default::UX_MAP_DSN)%'
+        
+        # Google Maps specific configuration
+        google_maps:
+            # Configure the default Map Id (https://developers.google.com/maps/documentation/get-map-id),
+            # without to manually configure it in each map instance (through "new GoogleOptions(mapId: 'your_map_id')").
+            default_map_id: null
 
 The ``UX_MAP_DSN`` environment variable configure which renderer to use.
 

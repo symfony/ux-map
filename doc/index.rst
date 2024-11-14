@@ -122,7 +122,7 @@ You can add markers to a map using the ``addMarker()`` method::
         // You can also pass arbitrary data via the `extra` option in both the marker
         // and the infoWindow; you can later use this data in your custom Stimulus controllers
         ->addMarker(new Marker(
-            // ...
+            position: new Point(45.7740, 4.8351), 
             extra: [
                 'icon_mask_url' => 'https://maps.gstatic.com/mapfiles/place_api/icons/v2/tree_pinlet.svg',
             ],
@@ -133,7 +133,7 @@ You can add markers to a map using the ``addMarker()`` method::
                     'includes_link' => true,
                 ],
             ),
-        )
+        ))
     ;
 
 Add Polygons

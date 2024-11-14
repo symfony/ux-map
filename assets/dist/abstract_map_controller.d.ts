@@ -3,14 +3,6 @@ export type Point = {
     lat: number;
     lng: number;
 };
-export type MapView<Options, MarkerOptions, InfoWindowOptions, PolygonOptions> = {
-    center: Point | null;
-    zoom: number | null;
-    fitBoundsToMarkers: boolean;
-    markers: Array<MarkerDefinition<MarkerOptions, InfoWindowOptions>>;
-    polygons: Array<PolygonDefinition<PolygonOptions, InfoWindowOptions>>;
-    options: Options;
-};
 export type MarkerDefinition<MarkerOptions, InfoWindowOptions> = {
     position: Point;
     title: string | null;
@@ -39,7 +31,12 @@ export default abstract class<MapOptions, Map, MarkerOptions, Marker, InfoWindow
         providerOptions: ObjectConstructor;
         view: ObjectConstructor;
     };
-    viewValue: MapView<MapOptions, MarkerOptions, InfoWindowOptions, PolygonOptions>;
+    centerValue: Point | null;
+    zoomValue: number | null;
+    fitBoundsToMarkersValue: boolean;
+    markersValue: Array<MarkerDefinition<MarkerOptions, InfoWindowOptions>>;
+    polygonsValue: Array<PolygonDefinition<PolygonOptions, InfoWindowOptions>>;
+    optionsValue: MapOptions;
     protected map: Map;
     protected markers: Array<Marker>;
     protected infoWindows: Array<InfoWindow>;

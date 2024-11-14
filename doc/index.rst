@@ -30,11 +30,11 @@ Configuration
 Configuration is done in your ``config/packages/ux_map.yaml`` file:
 
 .. code-block:: yaml
-    
+
     # config/packages/ux_map.yaml
     ux_map:
         renderer: '%env(resolve:default::UX_MAP_DSN)%'
-        
+
         # Google Maps specific configuration
         google_maps:
             # Configure the default Map Id (https://developers.google.com/maps/documentation/get-map-id),
@@ -47,8 +47,8 @@ Map renderers
 ~~~~~~~~~~~~~
 
 The Symfony UX Map bundle supports multiple renderers. A map renderer is a
-service that provides the code and graphic assets required to render and 
-interact with a map in the browser. 
+service that provides the code and graphic assets required to render and
+interact with a map in the browser.
 
 Available renderers
 ~~~~~~~~~~~~~~~~~~~
@@ -75,7 +75,7 @@ Create a map
 
 A map is created by calling ``new Map()``. You can configure the center, zoom, and add markers.
 Start by creating a new map instance::
-    
+
     use Symfony\UX\Map\Map;
 
     // Create a new map instance
@@ -88,12 +88,12 @@ You can set the center and zoom of the map using the ``center()`` and ``zoom()``
 
     use Symfony\UX\Map\Map;
     use Symfony\UX\Map\Point;
-    
+
     $myMap
         // Explicitly set the center and zoom
         ->center(new Point(46.903354, 1.888334))
         ->zoom(6)
-        
+
         // Or automatically fit the bounds to the markers
         ->fitBoundsToMarkers()
     ;
@@ -105,13 +105,13 @@ You can add markers to a map using the ``addMarker()`` method::
 
     $myMap
         ->addMarker(new Marker(
-            position: new Point(48.8566, 2.3522), 
+            position: new Point(48.8566, 2.3522),
             title: 'Paris'
         ))
 
         // With an info window associated to the marker:
         ->addMarker(new Marker(
-            position: new Point(45.7640, 4.8357), 
+            position: new Point(45.7640, 4.8357),
             title: 'Lyon',
             infoWindow: new InfoWindow(
                 headerContent: '<b>Lyon</b>',
@@ -174,7 +174,7 @@ You can add custom HTML attributes too:
 Twig Function ``ux_map()``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``ux_map()`` Twig function allows you to create and render a map in your Twig 
+The ``ux_map()`` Twig function allows you to create and render a map in your Twig
 templates. The function accepts the same arguments as the ``Map`` class:
 
 .. code-block:: html+twig
@@ -216,10 +216,8 @@ Alternatively, you can use the ``<twig:ux:map />`` component.
                 "infoWindow": {"content": "Welcome to <b>New York</b>"}
             }
         ]'
-        attributes='{
-            "class": "foo",
-            "style": "height: 800px; width: 100%; border: 4px solid red; margin-block: 10vh;"
-        }'
+        class="foo"
+        style="height: 800px; width: 100%; border: 4px solid red; margin-block: 10vh;"
     />
 
 The ``<twig:ux:map />`` component requires the `Twig Component`_ package.
@@ -236,9 +234,9 @@ Symfony UX Map allows you to extend its default behavior using a custom Stimulus
 .. code-block:: javascript
 
     // assets/controllers/mymap_controller.js
-    
+
     import { Controller } from '@hotwired/stimulus';
-    
+
     export default class extends Controller {
         connect() {
             this.element.addEventListener('ux:map:pre-connect', this._onPreConnect);
@@ -248,7 +246,7 @@ Symfony UX Map allows you to extend its default behavior using a custom Stimulus
             this.element.addEventListener('ux:map:info-window:before-create', this._onInfoWindowBeforeCreate);
             this.element.addEventListener('ux:map:info-window:after-create', this._onInfoWindowAfterCreate);
         }
-    
+
         disconnect() {
             // You should always remove listeners when the controller is disconnected to avoid side effects
             this.element.removeEventListener('ux:map:pre-connect', this._onPreConnect);
@@ -258,13 +256,13 @@ Symfony UX Map allows you to extend its default behavior using a custom Stimulus
             this.element.removeEventListener('ux:map:info-window:before-create', this._onInfoWindowBeforeCreate);
             this.element.removeEventListener('ux:map:info-window:after-create', this._onInfoWindowAfterCreate);
         }
-    
+
         _onPreConnect(event) {
             // The map is not created yet
             // You can use this event to configure the map before it is created
             console.log(event.detail.options);
         }
-        
+
         _onConnect(event) {
             // The map, markers and infoWindows are created
             // The instances depend on the renderer you are using
@@ -272,19 +270,19 @@ Symfony UX Map allows you to extend its default behavior using a custom Stimulus
             console.log(event.detail.markers);
             console.log(event.detail.infoWindows);
         }
-        
+
         _onMarkerBeforeCreate(event) {
             // The marker is not created yet
             // You can use this event to configure the marker before it is created
             console.log(event.detail.definition);
         }
-        
+
         _onMarkerAfterCreate(event) {
             // The marker is created
             // The instance depends on the renderer you are using
             console.log(event.detail.marker);
         }
-        
+
         _onInfoWindowBeforeCreate(event) {
             // The infoWindow is not created yet
             // You can use this event to configure the infoWindow before it is created
@@ -292,7 +290,7 @@ Symfony UX Map allows you to extend its default behavior using a custom Stimulus
             // The associated marker instance is also available
             console.log(event.detail.marker);
         }
-        
+
         _onInfoWindowAfterCreate(event) {
             // The infoWindow is created
             // The instance depends on the renderer you are using
@@ -306,7 +304,7 @@ Symfony UX Map allows you to extend its default behavior using a custom Stimulus
 Then, you can use this controller in your template:
 
 .. code-block:: twig
-    
+
     {{ ux_map(my_map, { 'data-controller': 'mymap', style: 'height: 300px' }) }}
 
 .. tip::

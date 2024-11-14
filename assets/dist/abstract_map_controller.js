@@ -8,12 +8,12 @@ class default_1 extends Controller {
         this.polygons = [];
     }
     connect() {
-        const { center, zoom, options, markers, polygons, fitBoundsToMarkers } = this.viewValue;
+        const options = this.optionsValue;
         this.dispatchEvent('pre-connect', { options });
-        this.map = this.doCreateMap({ center, zoom, options });
-        markers.forEach((marker) => this.createMarker(marker));
-        polygons.forEach((polygon) => this.createPolygon(polygon));
-        if (fitBoundsToMarkers) {
+        this.map = this.doCreateMap({ center: this.centerValue, zoom: this.zoomValue, options });
+        this.markersValue.forEach((marker) => this.createMarker(marker));
+        this.polygonsValue.forEach((polygon) => this.createPolygon(polygon));
+        if (this.fitBoundsToMarkersValue) {
             this.doFitBoundsToMarkers();
         }
         this.dispatchEvent('connect', {

@@ -2,15 +2,6 @@ import { Controller } from '@hotwired/stimulus';
 
 export type Point = { lat: number; lng: number };
 
-export type MapView<Options, MarkerOptions, InfoWindowOptions, PolygonOptions> = {
-    center: Point | null;
-    zoom: number | null;
-    fitBoundsToMarkers: boolean;
-    markers: Array<MarkerDefinition<MarkerOptions, InfoWindowOptions>>;
-    polygons: Array<PolygonDefinition<PolygonOptions, InfoWindowOptions>>;
-    options: Options;
-};
-
 export type MarkerDefinition<MarkerOptions, InfoWindowOptions> = {
     position: Point;
     title: string | null;
@@ -71,7 +62,12 @@ export default abstract class<
         view: Object,
     };
 
-    declare viewValue: MapView<MapOptions, MarkerOptions, InfoWindowOptions, PolygonOptions>;
+    declare centerValue: Point | null;
+    declare zoomValue: number | null;
+    declare fitBoundsToMarkersValue: boolean;
+    declare markersValue: Array<MarkerDefinition<MarkerOptions, InfoWindowOptions>>;
+    declare polygonsValue: Array<PolygonDefinition<PolygonOptions, InfoWindowOptions>>;
+    declare optionsValue: MapOptions;
 
     protected map: Map;
     protected markers: Array<Marker> = [];
@@ -79,17 +75,17 @@ export default abstract class<
     protected polygons: Array<Polygon> = [];
 
     connect() {
-        const { center, zoom, options, markers, polygons, fitBoundsToMarkers } = this.viewValue;
+        const options = this.optionsValue;
 
         this.dispatchEvent('pre-connect', { options });
 
-        this.map = this.doCreateMap({ center, zoom, options });
+        this.map = this.doCreateMap({ center: this.centerValue, zoom: this.zoomValue, options });
 
-        markers.forEach((marker) => this.createMarker(marker));
+        this.markersValue.forEach((marker) => this.createMarker(marker));
 
-        polygons.forEach((polygon) => this.createPolygon(polygon));
+        this.polygonsValue.forEach((polygon) => this.createPolygon(polygon));
 
-        if (fitBoundsToMarkers) {
+        if (this.fitBoundsToMarkersValue) {
             this.doFitBoundsToMarkers();
         }
 

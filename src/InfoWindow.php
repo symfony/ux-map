@@ -71,6 +71,10 @@ final readonly class InfoWindow
         if (isset($data['position'])) {
             $data['position'] = Point::fromArray($data['position']);
         }
+        
+        if (isset($data['extra'])) {
+            $data['extra'] = (array) $data['extra'];
+        }
 
         return new self(...$data);
     }

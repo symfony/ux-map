@@ -15,13 +15,22 @@ use PHPUnit\Framework\TestCase;
 use Symfony\UX\Map\Exception\InvalidArgumentException;
 use Symfony\UX\Map\InfoWindow;
 use Symfony\UX\Map\Map;
-use Symfony\UX\Map\MapOptionsInterface;
 use Symfony\UX\Map\Marker;
 use Symfony\UX\Map\Point;
 use Symfony\UX\Map\Polygon;
 
 class MapTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        DummyOptions::registerToNormalizer();
+    }
+
+    protected function tearDown(): void
+    {
+        DummyOptions::unregisterFromNormalizer();
+    }
+
     public function testCenterValidation(): void
     {
         self::expectException(InvalidArgumentException::class);
@@ -86,18 +95,12 @@ class MapTest extends TestCase
             ->center(new Point(48.8566, 2.3522))
             ->zoom(6)
             ->fitBoundsToMarkers()
-            ->options(new class implements MapOptionsInterface {
-                public function toArray(): array
-                {
-                    return [
-                        'mapTypeId' => 'roadmap',
-                    ];
-                }
-            })
+            ->options(new DummyOptions(mapId: '1a2b3c4d5e', mapType: 'roadmap'))
             ->addMarker(new Marker(
                 position: new Point(48.8566, 2.3522),
                 title: 'Paris',
-                infoWindow: new InfoWindow(headerContent: '<b>Paris</b>', content: 'Paris', position: new Point(48.8566, 2.3522))
+                infoWindow: new InfoWindow(headerContent: '<b>Paris</b>', content: 'Paris', position: new Point(48.8566, 2.3522), extra: ['baz' => 'qux']),
+                extra: ['foo' => 'bar'],
             ))
             ->addMarker(new Marker(
                 position: new Point(45.764, 4.8357),
@@ -135,13 +138,15 @@ class MapTest extends TestCase
             ))
         ;
 
-        $array = $map->toArray();
-
         self::assertEquals([
             'center' => ['lat' => 48.8566, 'lng' => 2.3522],
             'zoom' => 6.0,
             'fitBoundsToMarkers' => true,
-            'options' => $array['options'],
+            'options' => [
+                '@provider' => 'dummy',
+                'mapId' => '1a2b3c4d5e',
+                'mapType' => 'roadmap',
+            ],
             'markers' => [
                 [
                     'position' => ['lat' => 48.8566, 'lng' => 2.3522],
@@ -152,9 +157,9 @@ class MapTest extends TestCase
                         'position' => ['lat' => 48.8566, 'lng' => 2.3522],
                         'opened' => false,
                         'autoClose' => true,
-                        'extra' => $array['markers'][0]['infoWindow']['extra'],
+                        'extra' => ['baz' => 'qux'],
                     ],
-                    'extra' => $array['markers'][0]['extra'],
+                    'extra' => ['foo' => 'bar'],
                 ],
                 [
                     'position' => ['lat' => 45.764, 'lng' => 4.8357],
@@ -165,9 +170,9 @@ class MapTest extends TestCase
                         'position' => ['lat' => 45.764, 'lng' => 4.8357],
                         'opened' => true,
                         'autoClose' => true,
-                        'extra' => $array['markers'][1]['infoWindow']['extra'],
+                        'extra' => [],
                     ],
-                    'extra' => $array['markers'][1]['extra'],
+                    'extra' => [],
                 ],
                 [
                     'position' => ['lat' => 43.2965, 'lng' => 5.3698],
@@ -178,9 +183,9 @@ class MapTest extends TestCase
                         'position' => ['lat' => 43.2965, 'lng' => 5.3698],
                         'opened' => true,
                         'autoClose' => true,
-                        'extra' => $array['markers'][2]['infoWindow']['extra'],
+                        'extra' => [],
                     ],
-                    'extra' => $array['markers'][2]['extra'],
+                    'extra' => [],
                 ],
             ],
             'polygons' => [
@@ -192,7 +197,7 @@ class MapTest extends TestCase
                     ],
                     'title' => 'Polygon 1',
                     'infoWindow' => null,
-                    'extra' => $array['polygons'][0]['extra'],
+                    'extra' => [],
                 ],
                 [
                     'points' => [
@@ -207,13 +212,11 @@ class MapTest extends TestCase
                         'position' => ['lat' => 45.764, 'lng' => 4.8357],
                         'opened' => true,
                         'autoClose' => true,
-                        'extra' => $array['polygons'][1]['infoWindow']['extra'],
+                        'extra' => [],
                     ],
-                    'extra' => $array['polygons'][1]['extra'],
+                    'extra' => [],
                 ],
             ],
-        ], $array);
-
-        self::assertSame('roadmap', $array['options']->mapTypeId);
+        ], $map->toArray());
     }
 }

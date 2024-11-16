@@ -12,10 +12,24 @@
 namespace Symfony\UX\Map\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Symfony\UX\Map\InfoWindow;
 use Symfony\UX\Map\Map;
+use Symfony\UX\Map\Marker;
+use Symfony\UX\Map\Point;
+use Symfony\UX\Map\Polygon;
 
 class MapFactoryTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        DummyOptions::registerToNormalizer();
+    }
+
+    protected function tearDown(): void
+    {
+        DummyOptions::unregisterFromNormalizer();
+    }
+
     public function testFromArray(): void
     {
         $array = self::createMapArray();
@@ -39,6 +53,39 @@ class MapFactoryTest extends TestCase
         $this->assertSame($array['polygons'][0]['title'], $polygons[0]['title']);
         $this->assertSame($array['polygons'][0]['infoWindow']['headerContent'], $polygons[0]['infoWindow']['headerContent']);
         $this->assertSame($array['polygons'][0]['infoWindow']['content'], $polygons[0]['infoWindow']['content']);
+    }
+
+    public function testToArrayFromArray(): void
+    {
+        $map = (new Map())
+            ->center(new Point(48.8566, 2.3522))
+            ->zoom(12)
+            ->addMarker(new Marker(
+                position: new Point(48.8566, 2.3522),
+                title: 'Paris',
+                infoWindow: new InfoWindow('Welcome to Paris, the city of lights', extra: ['color' => 'red']),
+                extra: ['color' => 'blue'],
+            ))
+            ->addMarker(new Marker(
+                position: new Point(44.837789, -0.57918),
+                title: 'Bordeaux',
+                infoWindow: new InfoWindow('Welcome to Bordeaux, the city of wine', extra: ['color' => 'red']),
+                extra: ['color' => 'blue'],
+            ))
+            ->addPolygon(new Polygon(
+                points: [
+                    new Point(48.858844, 2.294351),
+                    new Point(48.853, 2.3499),
+                    new Point(48.8566, 2.3522),
+                ],
+                title: 'Polygon 1',
+                infoWindow: new InfoWindow('Polygon 1', 'Polygon 1', extra: ['color' => 'red']),
+                extra: ['color' => 'blue'],
+            ));
+
+        $newMap = Map::fromArray($map->toArray());
+
+        $this->assertEquals($map->toArray(), $newMap->toArray());
     }
 
     public function testFromArrayWithInvalidCenter(): void

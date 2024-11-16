@@ -40,7 +40,7 @@ final readonly class Polygon
             'points' => array_map(fn (Point $point) => $point->toArray(), $this->points),
             'title' => $this->title,
             'infoWindow' => $this->infoWindow?->toArray(),
-            'extra' => (object) $this->extra,
+            'extra' => $this->extra,
         ];
     }
 

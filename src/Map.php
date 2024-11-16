@@ -111,7 +111,7 @@ final class Map
             'center' => $this->center?->toArray(),
             'zoom' => $this->zoom,
             'fitBoundsToMarkers' => $this->fitBoundsToMarkers,
-            'options' => (object) ($this->options?->toArray() ?? []),
+            'options' => $this->options ? MapOptionsNormalizer::normalize($this->options) : [],
             'markers' => array_map(static fn (Marker $marker) => $marker->toArray(), $this->markers),
             'polygons' => array_map(static fn (Polygon $polygon) => $polygon->toArray(), $this->polygons),
         ];
@@ -124,7 +124,7 @@ final class Map
      *     markers?: list<array>,
      *     polygons?: list<array>,
      *     fitBoundsToMarkers?: bool,
-     *     options?: object,
+     *     options?: array<string, mixed>,
      * } $map
      *
      * @internal
@@ -132,6 +132,10 @@ final class Map
     public static function fromArray(array $map): self
     {
         $map['fitBoundsToMarkers'] = true;
+
+        if (isset($map['options'])) {
+            $map['options'] = [] === $map['options'] ? null : MapOptionsNormalizer::denormalize($map['options']);
+        }
 
         if (isset($map['center'])) {
             $map['center'] = Point::fromArray($map['center']);

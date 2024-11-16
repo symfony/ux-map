@@ -50,7 +50,7 @@ final readonly class InfoWindow
             'position' => $this->position?->toArray(),
             'opened' => $this->opened,
             'autoClose' => $this->autoClose,
-            'extra' => (object) $this->extra,
+            'extra' => $this->extra,
         ];
     }
 
@@ -61,7 +61,7 @@ final readonly class InfoWindow
      *     position: array{lat: float, lng: float}|null,
      *     opened: bool,
      *     autoClose: bool,
-     *     extra: object,
+     *     extra: array,
      * } $data
      *
      * @internal
@@ -70,10 +70,6 @@ final readonly class InfoWindow
     {
         if (isset($data['position'])) {
             $data['position'] = Point::fromArray($data['position']);
-        }
-        
-        if (isset($data['extra'])) {
-            $data['extra'] = (array) $data['extra'];
         }
 
         return new self(...$data);

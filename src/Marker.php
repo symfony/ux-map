@@ -46,7 +46,7 @@ final readonly class Marker
             'position' => $this->position->toArray(),
             'title' => $this->title,
             'infoWindow' => $this->infoWindow?->toArray(),
-            'extra' => (object) $this->extra,
+            'extra' => $this->extra,
         ];
     }
 

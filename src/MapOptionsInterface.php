@@ -17,6 +17,13 @@ namespace Symfony\UX\Map;
 interface MapOptionsInterface
 {
     /**
+     * @internal
+     */
+    public static function fromArray(array $array): self;
+
+    /**
+     * @internal
+     *
      * @return array<string, mixed>
      */
     public function toArray(): array;

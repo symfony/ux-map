@@ -21,6 +21,7 @@ use Symfony\UX\Map\Exception\UnableToNormalizeOptionsException;
  * Normalizes and denormalizes map options.
  *
  * @internal
+ *
  * @author Hugo Alliaume <hugo@alliau.me>
  */
 final class MapOptionsNormalizer

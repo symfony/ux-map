@@ -60,62 +60,18 @@ describe('AbstractMapController', () => {
 
     beforeEach(() => {
         container = mountDOM(`
-          <div 
-            data-testid="map" 
-            data-controller="map" 
-            style="height: 700px; margin: 10px;" 
-            data-map-provider-options-value="{}" 
-            data-map-view-value='{
-                "center": { "lat": 48.8566, "lng": 2.3522 },
-                "zoom": 4,
-                "fitBoundsToMarkers": true,
-                "options": {},
-                "markers": [
-                    {
-                        "position": { "lat": 48.8566, "lng": 2.3522 },
-                        "title": "Paris",
-                        "infoWindow": null
-                    },
-                    {
-                        "position": { "lat": 45.764, "lng": 4.8357 },
-                        "title": "Lyon",
-                        "infoWindow": {
-                            "headerContent": "<b>Lyon</b>",
-                            "content": "The French town in the historic Rhône-Alpes region, located at the junction of the Rhône and Saône rivers.",
-                            "position": null,
-                            "opened": false,
-                            "autoClose": true
-                        }
-                    }
-                ],
-                "polygons": [
-                    {
-                        "coordinates": [
-                            { "lat": 48.858844, "lng": 2.294351 },
-                            { "lat": 48.853, "lng": 2.3499 },
-                            { "lat": 48.8566, "lng": 2.3522 }
-                        ],
-                        "title": "Polygon 1",
-                        "infoWindow": null
-                    },
-                    {
-                        "coordinates": [
-                            { "lat": 45.764043, "lng": 4.835659 },
-                            { "lat": 45.750000, "lng": 4.850000 },
-                            { "lat": 45.770000, "lng": 4.820000 }
-                        ],
-                        "title": "Polygon 2",
-                        "infoWindow": {
-                            "headerContent": "<b>Polygon 2</b>",
-                            "content": "A polygon around Lyon with some additional info.",
-                            "position": null,
-                            "opened": false,
-                            "autoClose": true
-                        }
-                    }
-                ]
-            }'>
-        </div>
+            <div 
+                data-testid="map" 
+                data-controller="map" 
+                data-map-provider-options-value="{}" 
+                data-map-center-value="{&quot;lat&quot;:48.8566,&quot;lng&quot;:2.3522}" 
+                data-map-zoom-value="4" 
+                data-map-fit-bounds-to-markers-value="false" 
+                data-map-options-value="{}" 
+                data-map-markers-value="[{&quot;position&quot;:{&quot;lat&quot;:48.8566,&quot;lng&quot;:2.3522},&quot;title&quot;:&quot;Paris&quot;,&quot;infoWindow&quot;:{&quot;headerContent&quot;:&quot;Paris&quot;,&quot;content&quot;:null,&quot;position&quot;:null,&quot;opened&quot;:false,&quot;autoClose&quot;:true,&quot;extra&quot;:[]},&quot;extra&quot;:[],&quot;@id&quot;:&quot;a69f13edd2e571f3&quot;},{&quot;position&quot;:{&quot;lat&quot;:45.75,&quot;lng&quot;:4.85},&quot;title&quot;:&quot;Lyon&quot;,&quot;infoWindow&quot;:{&quot;headerContent&quot;:&quot;Lyon&quot;,&quot;content&quot;:null,&quot;position&quot;:null,&quot;opened&quot;:false,&quot;autoClose&quot;:true,&quot;extra&quot;:[]},&quot;extra&quot;:[],&quot;@id&quot;:&quot;cb9c1a30d562694b&quot;},{&quot;position&quot;:{&quot;lat&quot;:43.6047,&quot;lng&quot;:1.4442},&quot;title&quot;:&quot;Toulouse&quot;,&quot;infoWindow&quot;:{&quot;headerContent&quot;:&quot;Toulouse&quot;,&quot;content&quot;:null,&quot;position&quot;:null,&quot;opened&quot;:false,&quot;autoClose&quot;:true,&quot;extra&quot;:[]},&quot;extra&quot;:[],&quot;@id&quot;:&quot;e6b3acef1325fb52&quot;}]" 
+                data-map-polygons-value="[{&quot;points&quot;:[{&quot;lat&quot;:48.8566,&quot;lng&quot;:2.3522},{&quot;lat&quot;:45.75,&quot;lng&quot;:4.85},{&quot;lat&quot;:43.6047,&quot;lng&quot;:1.4442}],&quot;title&quot;:null,&quot;infoWindow&quot;:null,&quot;extra&quot;:[],&quot;@id&quot;:&quot;228ae6f5c1b17cfd&quot;},{&quot;points&quot;:[{&quot;lat&quot;:1.4442,&quot;lng&quot;:43.6047},{&quot;lat&quot;:4.85,&quot;lng&quot;:45.75},{&quot;lat&quot;:2.3522,&quot;lng&quot;:48.8566}],&quot;title&quot;:null,&quot;infoWindow&quot;:{&quot;headerContent&quot;:&quot;Polygon&quot;,&quot;content&quot;:null,&quot;position&quot;:null,&quot;opened&quot;:false,&quot;autoClose&quot;:true,&quot;extra&quot;:{&quot;foo&quot;:&quot;bar&quot;}},&quot;extra&quot;:{&quot;fillColor&quot;:&quot;#ff0000&quot;},&quot;@id&quot;:&quot;9874334e4e8caa16&quot;}]" 
+                style="height: 600px"
+            ></div>
         `);
     });
 
@@ -132,24 +88,39 @@ describe('AbstractMapController', () => {
 
         const controller = application.getControllerForElementAndIdentifier(div, 'map');
         expect(controller.map).toEqual({ map: 'map', center: { lat: 48.8566, lng: 2.3522 }, zoom: 4, options: {} });
-        expect(controller.markers).toEqual([
-            { marker: 'marker', title: 'Paris' },
-            { marker: 'marker', title: 'Lyon' },
-        ]);
-        expect(controller.polygons).toEqual([
-            { polygon: 'polygon', title: 'Polygon 1' },
-            { polygon: 'polygon', title: 'Polygon 2' },
-        ]);
+        expect(controller.markers).toEqual(
+            new Map([
+                ['a69f13edd2e571f3', { '@id': 'a69f13edd2e571f3', marker: 'marker', title: 'Paris' }],
+                ['cb9c1a30d562694b', { '@id': 'cb9c1a30d562694b', marker: 'marker', title: 'Lyon' }],
+                ['e6b3acef1325fb52', { '@id': 'e6b3acef1325fb52', marker: 'marker', title: 'Toulouse' }],
+            ])
+        );
+        expect(controller.polygons).toEqual(
+            new Map([
+                ['228ae6f5c1b17cfd', { '@id': '228ae6f5c1b17cfd', polygon: 'polygon', title: null }],
+                ['9874334e4e8caa16', { '@id': '9874334e4e8caa16', polygon: 'polygon', title: null }],
+            ])
+        );
         expect(controller.infoWindows).toEqual([
             {
-                headerContent: '<b>Lyon</b>',
+                headerContent: 'Paris',
+                infoWindow: 'infoWindow',
+                marker: 'Paris',
+            },
+            {
+                headerContent: 'Lyon',
                 infoWindow: 'infoWindow',
                 marker: 'Lyon',
             },
             {
-                headerContent: '<b>Polygon 2</b>',
+                headerContent: 'Toulouse',
                 infoWindow: 'infoWindow',
-                polygon: 'Polygon 2',
+                marker: 'Toulouse',
+            },
+            {
+                headerContent: 'Polygon',
+                infoWindow: 'infoWindow',
+                polygon: null,
             },
         ]);
     });

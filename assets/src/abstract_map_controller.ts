@@ -3,6 +3,7 @@ import { Controller } from '@hotwired/stimulus';
 export type Point = { lat: number; lng: number };
 
 export type MarkerDefinition<MarkerOptions, InfoWindowOptions> = {
+    '@id': string;
     position: Point;
     title: string | null;
     infoWindow?: Omit<InfoWindowDefinition<InfoWindowOptions>, 'position'>;
@@ -20,6 +21,7 @@ export type MarkerDefinition<MarkerOptions, InfoWindowOptions> = {
 };
 
 export type PolygonDefinition<PolygonOptions, InfoWindowOptions> = {
+    '@id': string;
     infoWindow?: Omit<InfoWindowDefinition<InfoWindowOptions>, 'position'>;
     points: Array<Point>;
     title: string | null;
@@ -59,7 +61,12 @@ export default abstract class<
 > extends Controller<HTMLElement> {
     static values = {
         providerOptions: Object,
-        view: Object,
+        center: Object,
+        zoom: Number,
+        fitBoundsToMarkers: Boolean,
+        markers: Array,
+        polygons: Array,
+        options: Object,
     };
 
     declare centerValue: Point | null;
@@ -70,9 +77,9 @@ export default abstract class<
     declare optionsValue: MapOptions;
 
     protected map: Map;
-    protected markers: Array<Marker> = [];
+    protected markers = new Map<Marker>();
     protected infoWindows: Array<InfoWindow> = [];
-    protected polygons: Array<Polygon> = [];
+    protected polygons = new Map<Polygon>();
 
     connect() {
         const options = this.optionsValue;
@@ -91,8 +98,8 @@ export default abstract class<
 
         this.dispatchEvent('connect', {
             map: this.map,
-            markers: this.markers,
-            polygons: this.polygons,
+            markers: [...this.markers.values()],
+            polygons: [...this.polygons.values()],
             infoWindows: this.infoWindows,
         });
     }
@@ -112,20 +119,29 @@ export default abstract class<
         const marker = this.doCreateMarker(definition);
         this.dispatchEvent('marker:after-create', { marker });
 
-        this.markers.push(marker);
+        marker['@id'] = definition['@id'];
+
+        this.markers.set(definition['@id'], marker);
 
         return marker;
     }
 
-    createPolygon(definition: PolygonDefinition<PolygonOptions, InfoWindowOptions>): Polygon {
+    protected abstract removeMarker(marker: Marker): void;
+
+    protected abstract doCreateMarker(definition: MarkerDefinition<MarkerOptions, InfoWindowOptions>): Marker;
+
+    public createPolygon(definition: PolygonDefinition<PolygonOptions, InfoWindowOptions>): Polygon {
         this.dispatchEvent('polygon:before-create', { definition });
         const polygon = this.doCreatePolygon(definition);
         this.dispatchEvent('polygon:after-create', { polygon });
-        this.polygons.push(polygon);
+
+        polygon['@id'] = definition['@id'];
+
+        this.polygons.set(definition['@id'], polygon);
+
         return polygon;
     }
 
-    protected abstract doCreateMarker(definition: MarkerDefinition<MarkerOptions, InfoWindowOptions>): Marker;
     protected abstract doCreatePolygon(definition: PolygonDefinition<PolygonOptions, InfoWindowOptions>): Polygon;
 
     protected createInfoWindow({
@@ -162,4 +178,50 @@ export default abstract class<
     protected abstract doFitBoundsToMarkers(): void;
 
     protected abstract dispatchEvent(name: string, payload: Record<string, unknown>): void;
+
+    public abstract centerValueChanged(): void;
+
+    public abstract zoomValueChanged(): void;
+
+    public markersValueChanged(): void {
+        if (!this.map) {
+            return;
+        }
+
+        this.markers.forEach((marker) => {
+            if (!this.markersValue.find((m) => m['@id'] === marker['@id'])) {
+                this.removeMarker(marker);
+                this.markers.delete(marker['@id']);
+            }
+        });
+
+        this.markersValue.forEach((marker) => {
+            if (!this.markers.has(marker['@id'])) {
+                this.createMarker(marker);
+            }
+        });
+
+        if (this.fitBoundsToMarkersValue) {
+            this.doFitBoundsToMarkers();
+        }
+    }
+
+    public polygonsValueChanged(): void {
+        if (!this.map) {
+            return;
+        }
+
+        this.polygons.forEach((polygon) => {
+            if (!this.polygonsValue.find((p) => p['@id'] === polygon['@id'])) {
+                polygon.remove();
+                this.polygons.delete(polygon['@id']);
+            }
+        });
+
+        this.polygonsValue.forEach((polygon) => {
+            if (!this.polygons.has(polygon['@id'])) {
+                this.createPolygon(polygon);
+            }
+        });
+    }
 }

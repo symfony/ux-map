@@ -13,8 +13,6 @@ declare(strict_types=1);
 
 namespace Symfony\UX\Map\Exception;
 
-use Symfony\UX\Map\MapOptionsInterface;
-
 final class UnableToDenormalizeOptionsException extends LogicException
 {
     public function __construct(string $message)

@@ -59,7 +59,7 @@ abstract readonly class AbstractRenderer implements RendererInterface
         }
         $controllers['@symfony/ux-'.$this->getName().'-map/map'] = [
             'provider-options' => (object) $this->getProviderOptions(),
-            ...$map->toArray(),
+            ...$this->getMapAttributes($map),
         ];
 
         $stimulusAttributes = $this->stimulus->createStimulusAttributes();
@@ -80,5 +80,22 @@ abstract readonly class AbstractRenderer implements RendererInterface
         }
 
         return \sprintf('<div %s></div>', $stimulusAttributes);
+    }
+
+    private function getMapAttributes(Map $map): array
+    {
+        $computeId = fn (array $array) => hash('xxh3', json_encode($array));
+
+        $attrs = $map->toArray();
+
+        foreach ($attrs['markers'] as $key => $marker) {
+            $attrs['markers'][$key]['@id'] = $computeId($marker);
+        }
+
+        foreach ($attrs['polygons'] as $key => $polygon) {
+            $attrs['polygons'][$key]['@id'] = $computeId($polygon);
+        }
+
+        return $attrs;
     }
 }

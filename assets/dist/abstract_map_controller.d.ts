@@ -4,6 +4,7 @@ export type Point = {
     lng: number;
 };
 export type MarkerDefinition<MarkerOptions, InfoWindowOptions> = {
+    '@id': string;
     position: Point;
     title: string | null;
     infoWindow?: Omit<InfoWindowDefinition<InfoWindowOptions>, 'position'>;
@@ -11,6 +12,7 @@ export type MarkerDefinition<MarkerOptions, InfoWindowOptions> = {
     extra: Record<string, unknown>;
 };
 export type PolygonDefinition<PolygonOptions, InfoWindowOptions> = {
+    '@id': string;
     infoWindow?: Omit<InfoWindowDefinition<InfoWindowOptions>, 'position'>;
     points: Array<Point>;
     title: string | null;
@@ -29,7 +31,12 @@ export type InfoWindowDefinition<InfoWindowOptions> = {
 export default abstract class<MapOptions, Map, MarkerOptions, Marker, InfoWindowOptions, InfoWindow, PolygonOptions, Polygon> extends Controller<HTMLElement> {
     static values: {
         providerOptions: ObjectConstructor;
-        view: ObjectConstructor;
+        center: ObjectConstructor;
+        zoom: NumberConstructor;
+        fitBoundsToMarkers: BooleanConstructor;
+        markers: ArrayConstructor;
+        polygons: ArrayConstructor;
+        options: ObjectConstructor;
     };
     centerValue: Point | null;
     zoomValue: number | null;
@@ -38,9 +45,9 @@ export default abstract class<MapOptions, Map, MarkerOptions, Marker, InfoWindow
     polygonsValue: Array<PolygonDefinition<PolygonOptions, InfoWindowOptions>>;
     optionsValue: MapOptions;
     protected map: Map;
-    protected markers: Array<Marker>;
+    protected markers: globalThis.Map<any, any>;
     protected infoWindows: Array<InfoWindow>;
-    protected polygons: Array<Polygon>;
+    protected polygons: globalThis.Map<any, any>;
     connect(): void;
     protected abstract doCreateMap({ center, zoom, options, }: {
         center: Point | null;
@@ -48,8 +55,9 @@ export default abstract class<MapOptions, Map, MarkerOptions, Marker, InfoWindow
         options: MapOptions;
     }): Map;
     createMarker(definition: MarkerDefinition<MarkerOptions, InfoWindowOptions>): Marker;
-    createPolygon(definition: PolygonDefinition<PolygonOptions, InfoWindowOptions>): Polygon;
+    protected abstract removeMarker(marker: Marker): void;
     protected abstract doCreateMarker(definition: MarkerDefinition<MarkerOptions, InfoWindowOptions>): Marker;
+    createPolygon(definition: PolygonDefinition<PolygonOptions, InfoWindowOptions>): Polygon;
     protected abstract doCreatePolygon(definition: PolygonDefinition<PolygonOptions, InfoWindowOptions>): Polygon;
     protected createInfoWindow({ definition, element, }: {
         definition: MarkerDefinition<MarkerOptions, InfoWindowOptions>['infoWindow'] | PolygonDefinition<PolygonOptions, InfoWindowOptions>['infoWindow'];
@@ -64,4 +72,8 @@ export default abstract class<MapOptions, Map, MarkerOptions, Marker, InfoWindow
     }): InfoWindow;
     protected abstract doFitBoundsToMarkers(): void;
     protected abstract dispatchEvent(name: string, payload: Record<string, unknown>): void;
+    abstract centerValueChanged(): void;
+    abstract zoomValueChanged(): void;
+    markersValueChanged(): void;
+    polygonsValueChanged(): void;
 }

@@ -19,7 +19,6 @@ use Symfony\UX\TwigComponent\Attribute\ExposeInTemplate;
 use Symfony\UX\TwigComponent\Attribute\PostMount;
 
 /**
- *
  * @author Hugo Alliaume <hugo@alliau.me>
  */
 trait ComponentWithMapTrait

@@ -122,7 +122,7 @@ You can add markers to a map using the ``addMarker()`` method::
         // You can also pass arbitrary data via the `extra` option in both the marker
         // and the infoWindow; you can later use this data in your custom Stimulus controllers
         ->addMarker(new Marker(
-            position: new Point(45.7740, 4.8351), 
+            position: new Point(45.7740, 4.8351),
             extra: [
                 'icon_mask_url' => 'https://maps.gstatic.com/mapfiles/place_api/icons/v2/tree_pinlet.svg',
             ],
@@ -313,6 +313,96 @@ Then, you can use this controller in your template:
     `Symfony UX Map Google Maps brige docs`_ to learn about the exact code
     needed to customize the markers.
 
+Usage with Live Components
+--------------------------
+
+.. versionadded:: 2.22
+
+    The ability to render and interact with a Map inside a Live Component was added in Map 2.22.
+
+To use a Map inside a Live Component, you need to use the ``ComponentWithMapTrait`` trait
+and implement the method ``instantiateMap`` to return a ``Map`` instance.
+
+You can interact with the Map by using `LiveAction`
+
+.. code-block::
+
+    namespace App\Twig\Components;
+
+    use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
+    use Symfony\UX\LiveComponent\Attribute\LiveAction;
+    use Symfony\UX\LiveComponent\DefaultActionTrait;
+    use Symfony\UX\Map\InfoWindow;
+    use Symfony\UX\Map\Live\ComponentWithMapTrait;
+    use Symfony\UX\Map\Map;
+    use Symfony\UX\Map\Marker;
+    use Symfony\UX\Map\Point;
+
+    #[AsLiveComponent]
+    final class MapLivePlayground
+    {
+        use DefaultActionTrait;
+        use ComponentWithMapTrait;
+
+        protected function instantiateMap(): Map
+        {
+            return (new Map())
+                ->center(new Point(48.8566, 2.3522))
+                ->zoom(7)
+                ->addMarker(new Marker(position: new Point(48.8566, 2.3522), title: 'Paris', infoWindow: new InfoWindow('Paris')))
+                ->addMarker(new Marker(position: new Point(45.75, 4.85), title: 'Lyon', infoWindow: new InfoWindow('Lyon')))
+            ;
+        }
+    }
+
+Then, you can render the map with ``ux_map()`` in your template:
+
+.. code-block:: html+twig
+
+    <div{{ attributes.defaults() }}>
+        {{ ux_map(map, { style: 'height: 300px' }) }}
+    </div>
+
+Then, you can define `Live Actions`_ to interact with the map from the client-side.
+You can retrieve the map instance using the ``getMap()`` method, and change the map center, zoom, add markers, etc.
+
+.. code-block::
+
+        #[LiveAction]
+        public function doSomething(): void
+        {
+            // Change the map center
+            $this->getMap()->center(new Point(45.7640, 4.8357));
+
+            // Change the map zoom
+            $this->getMap()->zoom(6);
+
+            // Add a new marker
+            $this->getMap()->addMarker(new Marker(position: new Point(43.2965, 5.3698), title: 'Marseille', infoWindow: new InfoWindow('Marseille')));
+
+            // Add a new polygon
+            $this->getMap()->addPolygon(new Polygon(points: [
+                new Point(48.8566, 2.3522),
+                new Point(45.7640, 4.8357),
+                new Point(43.2965, 5.3698),
+                new Point(44.8378, -0.5792),
+            ], infoWindow: new InfoWindow('Paris, Lyon, Marseille, Bordeaux')));
+        }
+
+.. code-block:: html+twig
+
+    <div{{ attributes.defaults() }}>
+        {{ ux_map(map, { style: 'height: 300px' }) }}
+
+        <button
+            type="button"
+            data-action="live#action"
+            data-live-action-param="doSomething"
+        >
+            Do something with the map
+        </button>
+    </div>
+
 Backward Compatibility promise
 ------------------------------
 
@@ -326,3 +416,4 @@ https://symfony.com/doc/current/contributing/code/bc.html
 .. _`Symfony UX Map Google Maps brige docs`: https://github.com/symfony/ux/blob/2.x/src/Map/src/Bridge/Google/README.md
 .. _`Symfony UX Map Leaflet bridge docs`: https://github.com/symfony/ux/blob/2.x/src/Map/src/Bridge/Leaflet/README.md
 .. _`Twig Component`: https://symfony.com/bundles/ux-twig-component/current/index.html
+.. _`Live Actions`: https://symfony.com/bundles/ux-live-component/current/index.html#actions

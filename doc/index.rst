@@ -325,3 +325,4 @@ https://symfony.com/doc/current/contributing/code/bc.html
 .. _`Leaflet`: https://github.com/symfony/ux-leaflet-map
 .. _`Symfony UX Map Google Maps brige docs`: https://github.com/symfony/ux/blob/2.x/src/Map/src/Bridge/Google/README.md
 .. _`Symfony UX Map Leaflet bridge docs`: https://github.com/symfony/ux/blob/2.x/src/Map/src/Bridge/Leaflet/README.md
+.. _`Twig Component`: https://symfony.com/bundles/ux-twig-component/current/index.html

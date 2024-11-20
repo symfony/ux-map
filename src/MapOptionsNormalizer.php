@@ -42,13 +42,11 @@ final class MapOptionsNormalizer
             throw UnableToDenormalizeOptionsException::missingProviderKey(self::KEY_PROVIDER);
         }
 
-        if (!isset(self::$providers[$provider])) {
-            throw UnableToDenormalizeOptionsException::unsupportedProvider($provider, array_keys(self::$providers));
-        }
-
         unset($array[self::KEY_PROVIDER]);
 
-        $class = self::$providers[$provider];
+        if (null === $class = self::$providers[$provider] ?? null) {
+            throw UnableToDenormalizeOptionsException::unsupportedProvider($provider, array_keys(self::$providers));
+        }
 
         return $class::fromArray($array);
     }

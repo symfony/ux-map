@@ -23,10 +23,10 @@ final class UnableToNormalizeOptionsException extends LogicException
     }
 
     /**
-     * @param class-string<MapOptionsInterface> $classOptions
+     * @param class-string<MapOptionsInterface> $optionsClass
      */
-    public static function unsupportedProviderClass(string $classOptions): self
+    public static function unsupportedProviderClass(string $optionsClass): self
     {
-        return new self(\sprintf('the class "%s" is not supported.', $classOptions));
+        return new self(\sprintf('the class "%s" is not supported.', $optionsClass));
     }
 }

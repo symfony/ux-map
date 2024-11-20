@@ -20,6 +20,8 @@ use Symfony\UX\TwigComponent\Attribute\PostMount;
 
 /**
  * @author Hugo Alliaume <hugo@alliau.me>
+ *
+ * @experimental
  */
 trait ComponentWithMapTrait
 {
@@ -34,11 +36,7 @@ trait ComponentWithMapTrait
 
     public function getMap(): Map
     {
-        if (null === $this->map) {
-            $this->map = $this->instantiateMap();
-        }
-
-        return $this->map;
+        return $this->map ??= $this->instantiateMap();
     }
 
     /**

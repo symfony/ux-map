@@ -27,7 +27,7 @@ final class MapOptionsNormalizerTest extends TestCase
     public function testDenormalizingWhenProviderKeyIsMissing(): void
     {
         $this->expectException(UnableToDenormalizeOptionsException::class);
-        $this->expectExceptionMessage(' the provider key ("@provider") is missing in the normalized options.');
+        $this->expectExceptionMessage(' the provider key "@provider" is missing in the normalized options.');
 
         MapOptionsNormalizer::denormalize([]);
     }

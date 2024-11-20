@@ -323,7 +323,7 @@ Usage with Live Components
 To use a Map inside a Live Component, you need to use the ``ComponentWithMapTrait`` trait
 and implement the method ``instantiateMap`` to return a ``Map`` instance.
 
-You can interact with the Map by using `LiveAction`
+You can interact with the Map by using ``LiveAction`` attribute:
 
 .. code-block::
 
@@ -355,12 +355,12 @@ You can interact with the Map by using `LiveAction`
         }
     }
 
-Then, you can render the map with ``ux_map()`` in your template:
+Then, you can render the map with ``ux_map()`` in your component template:
 
 .. code-block:: html+twig
 
-    <div{{ attributes.defaults() }}>
-        {{ ux_map(map, { style: 'height: 300px' }) }}
+    <div{{ attributes }}>
+        {{ ux_map(map, {style: 'height: 300px'}) }}
     </div>
 
 Then, you can define `Live Actions`_ to interact with the map from the client-side.

@@ -22,7 +22,7 @@ final class UnableToDenormalizeOptionsException extends LogicException
 
     public static function missingProviderKey(string $key): self
     {
-        return new self(\sprintf('the provider key ("%s") is missing in the normalized options.', $key));
+        return new self(\sprintf('the provider key "%s" is missing in the normalized options.', $key));
     }
 
     public static function unsupportedProvider(string $provider, array $supportedProviders): self

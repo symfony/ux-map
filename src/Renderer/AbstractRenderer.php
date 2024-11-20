@@ -84,7 +84,7 @@ abstract readonly class AbstractRenderer implements RendererInterface
 
     private function getMapAttributes(Map $map): array
     {
-        $computeId = fn (array $array) => hash('xxh3', json_encode($array));
+        $computeId = fn (array $array) => hash('xxh3', json_encode($array, JSON_THROW_ON_ERROR));
 
         $attrs = $map->toArray();
 

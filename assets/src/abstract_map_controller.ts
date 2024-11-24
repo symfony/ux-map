@@ -2,11 +2,13 @@ import { Controller } from '@hotwired/stimulus';
 
 export type Point = { lat: number; lng: number };
 
-export type MarkerDefinition<MarkerOptions, InfoWindowOptions> = {
-    '@id': string;
+export type Identifier = string;
+export type WithIdentifier<T extends Record<string, unknown>> = T & { '@id': Identifier };
+
+export type MarkerDefinition<MarkerOptions, InfoWindowOptions> = WithIdentifier<{
     position: Point;
     title: string | null;
-    infoWindow?: Omit<InfoWindowDefinition<InfoWindowOptions>, 'position'>;
+    infoWindow?: InfoWindowWithoutPositionDefinition<InfoWindowOptions>;
     /**
      * Raw options passed to the marker constructor, specific to the map provider (e.g.: `L.marker()` for Leaflet).
      */
@@ -18,25 +20,41 @@ export type MarkerDefinition<MarkerOptions, InfoWindowOptions> = {
      *    - `ux:map:marker:after-create`
      */
     extra: Record<string, unknown>;
-};
+}>;
 
-export type PolygonDefinition<PolygonOptions, InfoWindowOptions> = {
-    '@id': string;
-    infoWindow?: Omit<InfoWindowDefinition<InfoWindowOptions>, 'position'>;
+export type PolygonDefinition<PolygonOptions, InfoWindowOptions> = WithIdentifier<{
+    infoWindow?: InfoWindowWithoutPositionDefinition<InfoWindowOptions>;
     points: Array<Point>;
     title: string | null;
+    /**
+     * Raw options passed to the marker constructor, specific to the map provider (e.g.: `L.marker()` for Leaflet).
+     */
     rawOptions?: PolygonOptions;
+    /**
+     * Extra data defined by the developer.
+     * They are not directly used by the Stimulus controller, but they can be used by the developer with event listeners:
+     *    - `ux:map:polygon:before-create`
+     *    - `ux:map:polygon:after-create`
+     */
     extra: Record<string, unknown>;
-};
+}>;
 
-export type PolylineDefinition<PolylineOptions, InfoWindowOptions> = {
-    '@id': string;
-    infoWindow?: Omit<InfoWindowDefinition<InfoWindowOptions>, 'position'>;
+export type PolylineDefinition<PolylineOptions, InfoWindowOptions> = WithIdentifier<{
+    infoWindow?: InfoWindowWithoutPositionDefinition<InfoWindowOptions>;
     points: Array<Point>;
     title: string | null;
+    /**
+     * Raw options passed to the marker constructor, specific to the map provider (e.g.: `L.marker()` for Leaflet).
+     */
     rawOptions?: PolylineOptions;
+    /**
+     * Extra data defined by the developer.
+     * They are not directly used by the Stimulus controller, but they can be used by the developer with event listeners:
+     *    - `ux:map:polyline:before-create`
+     *    - `ux:map:polyline:after-create`
+     */
     extra: Record<string, unknown>;
-};
+}>;
 
 export type InfoWindowDefinition<InfoWindowOptions> = {
     headerContent: string | null;
@@ -57,6 +75,11 @@ export type InfoWindowDefinition<InfoWindowOptions> = {
      */
     extra: Record<string, unknown>;
 };
+
+export type InfoWindowWithoutPositionDefinition<InfoWindowOptions> = Omit<
+    InfoWindowDefinition<InfoWindowOptions>,
+    'position'
+>;
 
 export default abstract class<
     MapOptions,
@@ -90,10 +113,14 @@ export default abstract class<
     declare optionsValue: MapOptions;
 
     protected map: Map;
-    protected markers = new Map<Marker>();
+    protected markers = new Map<Identifier, Marker>();
+    protected polygons = new Map<Identifier, Polygon>();
+    protected polylines = new Map<Identifier, Polyline>();
     protected infoWindows: Array<InfoWindow> = [];
-    protected polygons = new Map<Polygon>();
-    protected polylines = new Map<Polyline>();
+
+    private isConnected = false;
+
+    protected abstract dispatchEvent(name: string, payload: Record<string, unknown>): void;
 
     connect() {
         const options = this.optionsValue;
@@ -101,11 +128,8 @@ export default abstract class<
         this.dispatchEvent('pre-connect', { options });
 
         this.map = this.doCreateMap({ center: this.centerValue, zoom: this.zoomValue, options });
-
         this.markersValue.forEach((marker) => this.createMarker(marker));
-
         this.polygonsValue.forEach((polygon) => this.createPolygon(polygon));
-
         this.polylinesValue.forEach((polyline) => this.createPolyline(polyline));
 
         if (this.fitBoundsToMarkersValue) {
@@ -119,8 +143,141 @@ export default abstract class<
             polylines: [...this.polylines.values()],
             infoWindows: this.infoWindows,
         });
+
+        this.isConnected = true;
     }
 
+    //region Public API
+    public createMarker(definition: MarkerDefinition<MarkerOptions, InfoWindowOptions>): Marker {
+        this.dispatchEvent('marker:before-create', { definition });
+        const marker = this.doCreateMarker(definition);
+        this.dispatchEvent('marker:after-create', { marker });
+
+        this.markers.set(definition['@id'], marker);
+
+        return marker;
+    }
+
+    public createPolygon(definition: PolygonDefinition<PolygonOptions, InfoWindowOptions>): Polygon {
+        this.dispatchEvent('polygon:before-create', { definition });
+        const polygon = this.doCreatePolygon(definition);
+        this.dispatchEvent('polygon:after-create', { polygon });
+
+        this.polygons.set(definition['@id'], polygon);
+
+        return polygon;
+    }
+
+    public createPolyline(definition: PolylineDefinition<PolylineOptions, InfoWindowOptions>): Polyline {
+        this.dispatchEvent('polyline:before-create', { definition });
+        const polyline = this.doCreatePolyline(definition);
+        this.dispatchEvent('polyline:after-create', { polyline });
+
+        this.polylines.set(definition['@id'], polyline);
+
+        return polyline;
+    }
+
+    public createInfoWindow({
+        definition,
+        element,
+    }: {
+        definition: InfoWindowWithoutPositionDefinition<InfoWindowOptions>;
+        element: Marker | Polygon | Polyline;
+    }): InfoWindow {
+        this.dispatchEvent('info-window:before-create', { definition, element });
+        const infoWindow = this.doCreateInfoWindow({ definition, element });
+        this.dispatchEvent('info-window:after-create', { infoWindow, element });
+
+        this.infoWindows.push(infoWindow);
+
+        return infoWindow;
+    }
+    //endregion
+
+    //region Hooks called by Stimulus when the values change
+    public abstract centerValueChanged(): void;
+
+    public abstract zoomValueChanged(): void;
+
+    public markersValueChanged(): void {
+        if (!this.isConnected) {
+            return;
+        }
+
+        const idsToRemove = new Set(this.markers.keys());
+        this.markersValue.forEach((definition) => {
+            idsToRemove.delete(definition['@id']);
+        });
+
+        idsToRemove.forEach((id) => {
+            // biome-ignore lint/style/noNonNullAssertion: the ids are coming from the keys of the map
+            const marker = this.markers.get(id)!;
+            this.doRemoveMarker(marker);
+            this.markers.delete(id);
+        });
+
+        this.markersValue.forEach((definition) => {
+            if (!this.markers.has(definition['@id'])) {
+                this.createMarker(definition);
+            }
+        });
+
+        if (this.fitBoundsToMarkersValue) {
+            this.doFitBoundsToMarkers();
+        }
+    }
+
+    public polygonsValueChanged(): void {
+        if (!this.isConnected) {
+            return;
+        }
+
+        const idsToRemove = new Set(this.polygons.keys());
+        this.polygonsValue.forEach((definition) => {
+            idsToRemove.delete(definition['@id']);
+        });
+
+        idsToRemove.forEach((id) => {
+            // biome-ignore lint/style/noNonNullAssertion: the ids are coming from the keys of the map
+            const polygon = this.polygons.get(id)!;
+            this.doRemovePolygon(polygon);
+            this.polygons.delete(id);
+        });
+
+        this.polygonsValue.forEach((definition) => {
+            if (!this.polygons.has(definition['@id'])) {
+                this.createPolygon(definition);
+            }
+        });
+    }
+
+    public polylinesValueChanged(): void {
+        if (!this.isConnected) {
+            return;
+        }
+
+        const idsToRemove = new Set(this.polylines.keys());
+        this.polylinesValue.forEach((definition) => {
+            idsToRemove.delete(definition['@id']);
+        });
+
+        idsToRemove.forEach((id) => {
+            // biome-ignore lint/style/noNonNullAssertion: the ids are coming from the keys of the map
+            const polyline = this.polylines.get(id)!;
+            this.doRemovePolyline(polyline);
+            this.polylines.delete(id);
+        });
+
+        this.polylinesValue.forEach((definition) => {
+            if (!this.polylines.has(definition['@id'])) {
+                this.createPolyline(definition);
+            }
+        });
+    }
+    //endregion
+
+    //region Abstract factory methods to be implemented by the concrete classes, they are specific to the map provider
     protected abstract doCreateMap({
         center,
         zoom,
@@ -131,150 +288,23 @@ export default abstract class<
         options: MapOptions;
     }): Map;
 
-    public createMarker(definition: MarkerDefinition<MarkerOptions, InfoWindowOptions>): Marker {
-        this.dispatchEvent('marker:before-create', { definition });
-        const marker = this.doCreateMarker(definition);
-        this.dispatchEvent('marker:after-create', { marker });
-
-        marker['@id'] = definition['@id'];
-
-        this.markers.set(definition['@id'], marker);
-
-        return marker;
-    }
-
-    protected abstract removeMarker(marker: Marker): void;
+    protected abstract doFitBoundsToMarkers(): void;
 
     protected abstract doCreateMarker(definition: MarkerDefinition<MarkerOptions, InfoWindowOptions>): Marker;
-
-    public createPolygon(definition: PolygonDefinition<PolygonOptions, InfoWindowOptions>): Polygon {
-        this.dispatchEvent('polygon:before-create', { definition });
-        const polygon = this.doCreatePolygon(definition);
-        this.dispatchEvent('polygon:after-create', { polygon });
-
-        polygon['@id'] = definition['@id'];
-
-        this.polygons.set(definition['@id'], polygon);
-
-        return polygon;
-    }
-
-    protected abstract removePolygon(polygon: Polygon): void;
+    protected abstract doRemoveMarker(marker: Marker): void;
 
     protected abstract doCreatePolygon(definition: PolygonDefinition<PolygonOptions, InfoWindowOptions>): Polygon;
-
-    public createPolyline(definition: PolylineDefinition<PolylineOptions, InfoWindowOptions>): Polyline {
-        this.dispatchEvent('polyline:before-create', { definition });
-        const polyline = this.doCreatePolyline(definition);
-        this.dispatchEvent('polyline:after-create', { polyline });
-
-        polyline['@id'] = definition['@id'];
-
-        this.polylines.set(definition['@id'], polyline);
-
-        return polyline;
-    }
-
-    protected abstract removePolyline(polyline: Polyline): void;
+    protected abstract doRemovePolygon(polygon: Polygon): void;
 
     protected abstract doCreatePolyline(definition: PolylineDefinition<PolylineOptions, InfoWindowOptions>): Polyline;
-
-    protected createInfoWindow({
-        definition,
-        element,
-    }:
-        | { definition: MarkerDefinition<MarkerOptions, InfoWindowOptions>['infoWindow']; element: Marker }
-        | { definition: PolygonDefinition<PolygonOptions, InfoWindowOptions>['infoWindow']; element: Polygon }
-        | {
-              definition: PolylineDefinition<PolylineOptions, InfoWindowOptions>['infoWindow'];
-              element: Polyline;
-          }): InfoWindow {
-        this.dispatchEvent('info-window:before-create', { definition, element });
-        const infoWindow = this.doCreateInfoWindow({ definition, element });
-        this.dispatchEvent('info-window:after-create', { infoWindow, element });
-
-        this.infoWindows.push(infoWindow);
-
-        return infoWindow;
-    }
+    protected abstract doRemovePolyline(polyline: Polyline): void;
 
     protected abstract doCreateInfoWindow({
         definition,
         element,
-    }:
-        | { definition: MarkerDefinition<MarkerOptions, InfoWindowOptions>['infoWindow']; element: Marker }
-        | { definition: PolygonDefinition<PolygonOptions, InfoWindowOptions>['infoWindow']; element: Polygon }
-        | {
-              definition: PolylineDefinition<PolylineOptions, InfoWindowOptions>['infoWindow'];
-              element: Polyline;
-          }): InfoWindow;
-
-    protected abstract doFitBoundsToMarkers(): void;
-
-    protected abstract dispatchEvent(name: string, payload: Record<string, unknown>): void;
-
-    public abstract centerValueChanged(): void;
-
-    public abstract zoomValueChanged(): void;
-
-    public markersValueChanged(): void {
-        if (!this.map) {
-            return;
-        }
-
-        this.markers.forEach((marker) => {
-            if (!this.markersValue.find((m) => m['@id'] === marker['@id'])) {
-                this.removeMarker(marker);
-                this.markers.delete(marker['@id']);
-            }
-        });
-
-        this.markersValue.forEach((marker) => {
-            if (!this.markers.has(marker['@id'])) {
-                this.createMarker(marker);
-            }
-        });
-
-        if (this.fitBoundsToMarkersValue) {
-            this.doFitBoundsToMarkers();
-        }
-    }
-
-    public polygonsValueChanged(): void {
-        if (!this.map) {
-            return;
-        }
-
-        this.polygons.forEach((polygon) => {
-            if (!this.polygonsValue.find((p) => p['@id'] === polygon['@id'])) {
-                this.removePolygon(polygon);
-                this.polygons.delete(polygon['@id']);
-            }
-        });
-
-        this.polygonsValue.forEach((polygon) => {
-            if (!this.polygons.has(polygon['@id'])) {
-                this.createPolygon(polygon);
-            }
-        });
-    }
-
-    public polylinesValueChanged(): void {
-        if (!this.map) {
-            return;
-        }
-
-        this.polylines.forEach((polyline) => {
-            if (!this.polylinesValue.find((p) => p['@id'] === polyline['@id'])) {
-                this.removePolyline(polyline);
-                this.polylines.delete(polyline['@id']);
-            }
-        });
-
-        this.polylinesValue.forEach((polyline) => {
-            if (!this.polylines.has(polyline['@id'])) {
-                this.createPolyline(polyline);
-            }
-        });
-    }
+    }: {
+        definition: InfoWindowWithoutPositionDefinition<InfoWindowOptions>;
+        element: Marker | Polygon | Polyline;
+    }): InfoWindow;
+    //endregion
 }

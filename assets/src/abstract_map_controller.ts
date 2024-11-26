@@ -176,6 +176,7 @@ export default abstract class<
 
         return infoWindow;
     }
+
     //endregion
 
     //region Hooks called by Stimulus when the values change
@@ -188,23 +189,7 @@ export default abstract class<
             return;
         }
 
-        const idsToRemove = new Set(this.markers.keys());
-        this.markersValue.forEach((definition) => {
-            idsToRemove.delete(definition['@id']);
-        });
-
-        idsToRemove.forEach((id) => {
-            // biome-ignore lint/style/noNonNullAssertion: the ids are coming from the keys of the map
-            const marker = this.markers.get(id)!;
-            this.doRemoveMarker(marker);
-            this.markers.delete(id);
-        });
-
-        this.markersValue.forEach((definition) => {
-            if (!this.markers.has(definition['@id'])) {
-                this.createMarker({ definition });
-            }
-        });
+        this.onDrawChanged(this.markers, this.markersValue, this.createMarker, this.doRemoveMarker);
 
         if (this.fitBoundsToMarkersValue) {
             this.doFitBoundsToMarkers();
@@ -216,23 +201,7 @@ export default abstract class<
             return;
         }
 
-        const idsToRemove = new Set(this.polygons.keys());
-        this.polygonsValue.forEach((definition) => {
-            idsToRemove.delete(definition['@id']);
-        });
-
-        idsToRemove.forEach((id) => {
-            // biome-ignore lint/style/noNonNullAssertion: the ids are coming from the keys of the map
-            const polygon = this.polygons.get(id)!;
-            this.doRemovePolygon(polygon);
-            this.polygons.delete(id);
-        });
-
-        this.polygonsValue.forEach((definition) => {
-            if (!this.polygons.has(definition['@id'])) {
-                this.createPolygon({ definition });
-            }
-        });
+        this.onDrawChanged(this.polygons, this.polygonsValue, this.createPolygon, this.doRemovePolygon);
     }
 
     public polylinesValueChanged(): void {
@@ -240,23 +209,7 @@ export default abstract class<
             return;
         }
 
-        const idsToRemove = new Set(this.polylines.keys());
-        this.polylinesValue.forEach((definition) => {
-            idsToRemove.delete(definition['@id']);
-        });
-
-        idsToRemove.forEach((id) => {
-            // biome-ignore lint/style/noNonNullAssertion: the ids are coming from the keys of the map
-            const polyline = this.polylines.get(id)!;
-            this.doRemovePolyline(polyline);
-            this.polylines.delete(id);
-        });
-
-        this.polylinesValue.forEach((definition) => {
-            if (!this.polylines.has(definition['@id'])) {
-                this.createPolyline({ definition });
-            }
-        });
+        this.onDrawChanged(this.polylines, this.polylinesValue, this.createPolyline, this.doRemovePolyline);
     }
 
     //endregion
@@ -282,13 +235,17 @@ export default abstract class<
 
     protected abstract doCreatePolygon({
         definition,
-    }: { definition: PolygonDefinition<PolygonOptions, InfoWindowOptions> }): Polygon;
+    }: {
+        definition: PolygonDefinition<PolygonOptions, InfoWindowOptions>;
+    }): Polygon;
 
     protected abstract doRemovePolygon(polygon: Polygon): void;
 
     protected abstract doCreatePolyline({
         definition,
-    }: { definition: PolylineDefinition<PolylineOptions, InfoWindowOptions> }): Polyline;
+    }: {
+        definition: PolylineDefinition<PolylineOptions, InfoWindowOptions>;
+    }): Polyline;
 
     protected abstract doRemovePolyline(polyline: Polyline): void;
 
@@ -299,10 +256,10 @@ export default abstract class<
         definition: InfoWindowWithoutPositionDefinition<InfoWindowOptions>;
         element: Marker | Polygon | Polyline;
     }): InfoWindow;
+
     //endregion
 
     //region Private APIs
-
     private createDrawingFactory(
         type: 'marker',
         draws: typeof this.markers,
@@ -333,13 +290,56 @@ export default abstract class<
         // 'Factory' could be instantiated with an arbitrary type which could be unrelated to '({ definition }: { definition: WithIdentifier<any>; }) => Draw'
         return ({ definition }: { definition: WithIdentifier<any> }) => {
             this.dispatchEvent(eventBefore, { definition });
-            const drawing = factory(definition) as Draw;
+            const drawing = factory({ definition }) as Draw;
             this.dispatchEvent(eventAfter, { [type]: drawing });
 
             draws.set(definition['@id'], drawing);
 
             return drawing;
         };
+    }
+
+    private onDrawChanged(
+        draws: typeof this.markers,
+        newDrawDefinitions: typeof this.markersValue,
+        factory: typeof this.createMarker,
+        remover: typeof this.doRemoveMarker
+    ): void;
+    private onDrawChanged(
+        draws: typeof this.polygons,
+        newDrawDefinitions: typeof this.polygonsValue,
+        factory: typeof this.createPolygon,
+        remover: typeof this.doRemovePolygon
+    ): void;
+    private onDrawChanged(
+        draws: typeof this.polylines,
+        newDrawDefinitions: typeof this.polylinesValue,
+        factory: typeof this.createPolyline,
+        remover: typeof this.doRemovePolyline
+    ): void;
+    private onDrawChanged<Draw, DrawDefinition extends WithIdentifier<Record<string, unknown>>>(
+        draws: globalThis.Map<WithIdentifier<any>, Draw>,
+        newDrawDefinitions: Array<DrawDefinition>,
+        factory: (args: { definition: DrawDefinition }) => Draw,
+        remover: (args: Draw) => void
+    ): void {
+        const idsToRemove = new Set(draws.keys());
+        newDrawDefinitions.forEach((definition) => {
+            idsToRemove.delete(definition['@id']);
+        });
+
+        idsToRemove.forEach((id) => {
+            // biome-ignore lint/style/noNonNullAssertion: the ids are coming from the keys of the map
+            const draw = draws.get(id)!;
+            remover(draw);
+            draws.delete(id);
+        });
+
+        newDrawDefinitions.forEach((definition) => {
+            if (!draws.has(definition['@id'])) {
+                factory({ definition });
+            }
+        });
     }
     //endregion
 }

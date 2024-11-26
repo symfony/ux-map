@@ -99,4 +99,5 @@ export default abstract class<MapOptions, Map, MarkerOptions, Marker, InfoWindow
         element: Marker | Polygon | Polyline;
     }): InfoWindow;
     private createDrawingFactory;
+    private onDrawChanged;
 }

@@ -42,20 +42,7 @@ class default_1 extends Controller {
         if (!this.isConnected) {
             return;
         }
-        const idsToRemove = new Set(this.markers.keys());
-        this.markersValue.forEach((definition) => {
-            idsToRemove.delete(definition['@id']);
-        });
-        idsToRemove.forEach((id) => {
-            const marker = this.markers.get(id);
-            this.doRemoveMarker(marker);
-            this.markers.delete(id);
-        });
-        this.markersValue.forEach((definition) => {
-            if (!this.markers.has(definition['@id'])) {
-                this.createMarker({ definition });
-            }
-        });
+        this.onDrawChanged(this.markers, this.markersValue, this.createMarker, this.doRemoveMarker);
         if (this.fitBoundsToMarkersValue) {
             this.doFitBoundsToMarkers();
         }
@@ -64,50 +51,40 @@ class default_1 extends Controller {
         if (!this.isConnected) {
             return;
         }
-        const idsToRemove = new Set(this.polygons.keys());
-        this.polygonsValue.forEach((definition) => {
-            idsToRemove.delete(definition['@id']);
-        });
-        idsToRemove.forEach((id) => {
-            const polygon = this.polygons.get(id);
-            this.doRemovePolygon(polygon);
-            this.polygons.delete(id);
-        });
-        this.polygonsValue.forEach((definition) => {
-            if (!this.polygons.has(definition['@id'])) {
-                this.createPolygon({ definition });
-            }
-        });
+        this.onDrawChanged(this.polygons, this.polygonsValue, this.createPolygon, this.doRemovePolygon);
     }
     polylinesValueChanged() {
         if (!this.isConnected) {
             return;
         }
-        const idsToRemove = new Set(this.polylines.keys());
-        this.polylinesValue.forEach((definition) => {
-            idsToRemove.delete(definition['@id']);
-        });
-        idsToRemove.forEach((id) => {
-            const polyline = this.polylines.get(id);
-            this.doRemovePolyline(polyline);
-            this.polylines.delete(id);
-        });
-        this.polylinesValue.forEach((definition) => {
-            if (!this.polylines.has(definition['@id'])) {
-                this.createPolyline({ definition });
-            }
-        });
+        this.onDrawChanged(this.polylines, this.polylinesValue, this.createPolyline, this.doRemovePolyline);
     }
     createDrawingFactory(type, draws, factory) {
         const eventBefore = `${type}:before-create`;
         const eventAfter = `${type}:after-create`;
         return ({ definition }) => {
             this.dispatchEvent(eventBefore, { definition });
-            const drawing = factory(definition);
+            const drawing = factory({ definition });
             this.dispatchEvent(eventAfter, { [type]: drawing });
             draws.set(definition['@id'], drawing);
             return drawing;
         };
+    }
+    onDrawChanged(draws, newDrawDefinitions, factory, remover) {
+        const idsToRemove = new Set(draws.keys());
+        newDrawDefinitions.forEach((definition) => {
+            idsToRemove.delete(definition['@id']);
+        });
+        idsToRemove.forEach((id) => {
+            const draw = draws.get(id);
+            remover(draw);
+            draws.delete(id);
+        });
+        newDrawDefinitions.forEach((definition) => {
+            if (!draws.has(definition['@id'])) {
+                factory({ definition });
+            }
+        });
     }
 }
 default_1.values = {

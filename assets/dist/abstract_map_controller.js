@@ -12,10 +12,13 @@ class default_1 extends Controller {
     connect() {
         const options = this.optionsValue;
         this.dispatchEvent('pre-connect', { options });
+        this.createMarker = this.createDrawingFactory('marker', this.markers, this.doCreateMarker.bind(this));
+        this.createPolygon = this.createDrawingFactory('polygon', this.polygons, this.doCreatePolygon.bind(this));
+        this.createPolyline = this.createDrawingFactory('polyline', this.polylines, this.doCreatePolyline.bind(this));
         this.map = this.doCreateMap({ center: this.centerValue, zoom: this.zoomValue, options });
-        this.markersValue.forEach((marker) => this.createMarker(marker));
-        this.polygonsValue.forEach((polygon) => this.createPolygon(polygon));
-        this.polylinesValue.forEach((polyline) => this.createPolyline(polyline));
+        this.markersValue.forEach((definition) => this.createMarker({ definition }));
+        this.polygonsValue.forEach((definition) => this.createPolygon({ definition }));
+        this.polylinesValue.forEach((definition) => this.createPolyline({ definition }));
         if (this.fitBoundsToMarkersValue) {
             this.doFitBoundsToMarkers();
         }
@@ -27,27 +30,6 @@ class default_1 extends Controller {
             infoWindows: this.infoWindows,
         });
         this.isConnected = true;
-    }
-    createMarker(definition) {
-        this.dispatchEvent('marker:before-create', { definition });
-        const marker = this.doCreateMarker(definition);
-        this.dispatchEvent('marker:after-create', { marker });
-        this.markers.set(definition['@id'], marker);
-        return marker;
-    }
-    createPolygon(definition) {
-        this.dispatchEvent('polygon:before-create', { definition });
-        const polygon = this.doCreatePolygon(definition);
-        this.dispatchEvent('polygon:after-create', { polygon });
-        this.polygons.set(definition['@id'], polygon);
-        return polygon;
-    }
-    createPolyline(definition) {
-        this.dispatchEvent('polyline:before-create', { definition });
-        const polyline = this.doCreatePolyline(definition);
-        this.dispatchEvent('polyline:after-create', { polyline });
-        this.polylines.set(definition['@id'], polyline);
-        return polyline;
     }
     createInfoWindow({ definition, element, }) {
         this.dispatchEvent('info-window:before-create', { definition, element });
@@ -71,7 +53,7 @@ class default_1 extends Controller {
         });
         this.markersValue.forEach((definition) => {
             if (!this.markers.has(definition['@id'])) {
-                this.createMarker(definition);
+                this.createMarker({ definition });
             }
         });
         if (this.fitBoundsToMarkersValue) {
@@ -93,7 +75,7 @@ class default_1 extends Controller {
         });
         this.polygonsValue.forEach((definition) => {
             if (!this.polygons.has(definition['@id'])) {
-                this.createPolygon(definition);
+                this.createPolygon({ definition });
             }
         });
     }
@@ -112,9 +94,20 @@ class default_1 extends Controller {
         });
         this.polylinesValue.forEach((definition) => {
             if (!this.polylines.has(definition['@id'])) {
-                this.createPolyline(definition);
+                this.createPolyline({ definition });
             }
         });
+    }
+    createDrawingFactory(type, draws, factory) {
+        const eventBefore = `${type}:before-create`;
+        const eventAfter = `${type}:after-create`;
+        return ({ definition }) => {
+            this.dispatchEvent(eventBefore, { definition });
+            const drawing = factory(definition);
+            this.dispatchEvent(eventAfter, { [type]: drawing });
+            draws.set(definition['@id'], drawing);
+            return drawing;
+        };
     }
 }
 default_1.values = {

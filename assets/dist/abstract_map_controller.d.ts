@@ -62,11 +62,11 @@ export default abstract class<MapOptions, Map, MarkerOptions, Marker, InfoWindow
     protected polylines: globalThis.Map<string, Polyline>;
     protected infoWindows: Array<InfoWindow>;
     private isConnected;
+    private createMarker;
+    private createPolygon;
+    private createPolyline;
     protected abstract dispatchEvent(name: string, payload: Record<string, unknown>): void;
     connect(): void;
-    createMarker(definition: MarkerDefinition<MarkerOptions, InfoWindowOptions>): Marker;
-    createPolygon(definition: PolygonDefinition<PolygonOptions, InfoWindowOptions>): Polygon;
-    createPolyline(definition: PolylineDefinition<PolylineOptions, InfoWindowOptions>): Polyline;
     createInfoWindow({ definition, element, }: {
         definition: InfoWindowWithoutPositionDefinition<InfoWindowOptions>;
         element: Marker | Polygon | Polyline;
@@ -82,14 +82,21 @@ export default abstract class<MapOptions, Map, MarkerOptions, Marker, InfoWindow
         options: MapOptions;
     }): Map;
     protected abstract doFitBoundsToMarkers(): void;
-    protected abstract doCreateMarker(definition: MarkerDefinition<MarkerOptions, InfoWindowOptions>): Marker;
+    protected abstract doCreateMarker({ definition, }: {
+        definition: MarkerDefinition<MarkerOptions, InfoWindowOptions>;
+    }): Marker;
     protected abstract doRemoveMarker(marker: Marker): void;
-    protected abstract doCreatePolygon(definition: PolygonDefinition<PolygonOptions, InfoWindowOptions>): Polygon;
+    protected abstract doCreatePolygon({ definition, }: {
+        definition: PolygonDefinition<PolygonOptions, InfoWindowOptions>;
+    }): Polygon;
     protected abstract doRemovePolygon(polygon: Polygon): void;
-    protected abstract doCreatePolyline(definition: PolylineDefinition<PolylineOptions, InfoWindowOptions>): Polyline;
+    protected abstract doCreatePolyline({ definition, }: {
+        definition: PolylineDefinition<PolylineOptions, InfoWindowOptions>;
+    }): Polyline;
     protected abstract doRemovePolyline(polyline: Polyline): void;
     protected abstract doCreateInfoWindow({ definition, element, }: {
         definition: InfoWindowWithoutPositionDefinition<InfoWindowOptions>;
         element: Marker | Polygon | Polyline;
     }): InfoWindow;
+    private createDrawingFactory;
 }

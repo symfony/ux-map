@@ -16,7 +16,7 @@ class MyMapController extends AbstractMapController {
         return { map: 'map', center, zoom, options };
     }
 
-    doCreateMarker(definition) {
+    doCreateMarker({ definition }) {
         const marker = { marker: 'marker', title: definition.title };
 
         if (definition.infoWindow) {
@@ -26,7 +26,7 @@ class MyMapController extends AbstractMapController {
         return marker;
     }
 
-    doCreatePolygon(definition) {
+    doCreatePolygon({ definition }) {
         const polygon = { polygon: 'polygon', title: definition.title };
 
         if (definition.infoWindow) {
@@ -35,7 +35,7 @@ class MyMapController extends AbstractMapController {
         return polygon;
     }
 
-    doCreatePolyline(definition) {
+    doCreatePolyline({ definition }) {
         const polyline = { polyline: 'polyline', title: definition.title };
 
         if (definition.infoWindow) {
@@ -103,20 +103,18 @@ describe('AbstractMapController', () => {
         expect(controller.map).toEqual({ map: 'map', center: { lat: 48.8566, lng: 2.3522 }, zoom: 4, options: {} });
         expect(controller.markers).toEqual(
             new Map([
-                ['a69f13edd2e571f3', { '@id': 'a69f13edd2e571f3', marker: 'marker', title: 'Paris' }],
-                ['cb9c1a30d562694b', { '@id': 'cb9c1a30d562694b', marker: 'marker', title: 'Lyon' }],
-                ['e6b3acef1325fb52', { '@id': 'e6b3acef1325fb52', marker: 'marker', title: 'Toulouse' }],
+                ['a69f13edd2e571f3', { marker: 'marker', title: 'Paris' }],
+                ['cb9c1a30d562694b', { marker: 'marker', title: 'Lyon' }],
+                ['e6b3acef1325fb52', { marker: 'marker', title: 'Toulouse' }],
             ])
         );
         expect(controller.polygons).toEqual(
             new Map([
-                ['228ae6f5c1b17cfd', { '@id': '228ae6f5c1b17cfd', polygon: 'polygon', title: null }],
-                ['9874334e4e8caa16', { '@id': '9874334e4e8caa16', polygon: 'polygon', title: null }],
+                ['228ae6f5c1b17cfd', { polygon: 'polygon', title: null }],
+                ['9874334e4e8caa16', { polygon: 'polygon', title: null }],
             ])
         );
-        expect(controller.polylines).toEqual(
-            new Map([['0fa955da866c7720', { '@id': '0fa955da866c7720', polyline: 'polyline', title: null }]])
-        );
+        expect(controller.polylines).toEqual(new Map([['0fa955da866c7720', { polyline: 'polyline', title: null }]]));
         expect(controller.infoWindows).toEqual([
             {
                 headerContent: 'Paris',

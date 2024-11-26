@@ -119,6 +119,15 @@ export default abstract class<
     protected infoWindows: Array<InfoWindow> = [];
 
     private isConnected = false;
+    private createMarker: ({
+        definition,
+    }: { definition: MarkerDefinition<MarkerOptions, InfoWindowOptions> }) => Marker;
+    private createPolygon: ({
+        definition,
+    }: { definition: PolygonDefinition<PolygonOptions, InfoWindowOptions> }) => Polygon;
+    private createPolyline: ({
+        definition,
+    }: { definition: PolylineDefinition<PolylineOptions, InfoWindowOptions> }) => Polyline;
 
     protected abstract dispatchEvent(name: string, payload: Record<string, unknown>): void;
 
@@ -127,10 +136,14 @@ export default abstract class<
 
         this.dispatchEvent('pre-connect', { options });
 
+        this.createMarker = this.createDrawingFactory('marker', this.markers, this.doCreateMarker.bind(this));
+        this.createPolygon = this.createDrawingFactory('polygon', this.polygons, this.doCreatePolygon.bind(this));
+        this.createPolyline = this.createDrawingFactory('polyline', this.polylines, this.doCreatePolyline.bind(this));
+
         this.map = this.doCreateMap({ center: this.centerValue, zoom: this.zoomValue, options });
-        this.markersValue.forEach((marker) => this.createMarker(marker));
-        this.polygonsValue.forEach((polygon) => this.createPolygon(polygon));
-        this.polylinesValue.forEach((polyline) => this.createPolyline(polyline));
+        this.markersValue.forEach((definition) => this.createMarker({ definition }));
+        this.polygonsValue.forEach((definition) => this.createPolygon({ definition }));
+        this.polylinesValue.forEach((definition) => this.createPolyline({ definition }));
 
         if (this.fitBoundsToMarkersValue) {
             this.doFitBoundsToMarkers();
@@ -148,36 +161,6 @@ export default abstract class<
     }
 
     //region Public API
-    public createMarker(definition: MarkerDefinition<MarkerOptions, InfoWindowOptions>): Marker {
-        this.dispatchEvent('marker:before-create', { definition });
-        const marker = this.doCreateMarker(definition);
-        this.dispatchEvent('marker:after-create', { marker });
-
-        this.markers.set(definition['@id'], marker);
-
-        return marker;
-    }
-
-    public createPolygon(definition: PolygonDefinition<PolygonOptions, InfoWindowOptions>): Polygon {
-        this.dispatchEvent('polygon:before-create', { definition });
-        const polygon = this.doCreatePolygon(definition);
-        this.dispatchEvent('polygon:after-create', { polygon });
-
-        this.polygons.set(definition['@id'], polygon);
-
-        return polygon;
-    }
-
-    public createPolyline(definition: PolylineDefinition<PolylineOptions, InfoWindowOptions>): Polyline {
-        this.dispatchEvent('polyline:before-create', { definition });
-        const polyline = this.doCreatePolyline(definition);
-        this.dispatchEvent('polyline:after-create', { polyline });
-
-        this.polylines.set(definition['@id'], polyline);
-
-        return polyline;
-    }
-
     public createInfoWindow({
         definition,
         element,
@@ -219,7 +202,7 @@ export default abstract class<
 
         this.markersValue.forEach((definition) => {
             if (!this.markers.has(definition['@id'])) {
-                this.createMarker(definition);
+                this.createMarker({ definition });
             }
         });
 
@@ -247,7 +230,7 @@ export default abstract class<
 
         this.polygonsValue.forEach((definition) => {
             if (!this.polygons.has(definition['@id'])) {
-                this.createPolygon(definition);
+                this.createPolygon({ definition });
             }
         });
     }
@@ -271,10 +254,11 @@ export default abstract class<
 
         this.polylinesValue.forEach((definition) => {
             if (!this.polylines.has(definition['@id'])) {
-                this.createPolyline(definition);
+                this.createPolyline({ definition });
             }
         });
     }
+
     //endregion
 
     //region Abstract factory methods to be implemented by the concrete classes, they are specific to the map provider
@@ -290,13 +274,22 @@ export default abstract class<
 
     protected abstract doFitBoundsToMarkers(): void;
 
-    protected abstract doCreateMarker(definition: MarkerDefinition<MarkerOptions, InfoWindowOptions>): Marker;
+    protected abstract doCreateMarker({
+        definition,
+    }: { definition: MarkerDefinition<MarkerOptions, InfoWindowOptions> }): Marker;
+
     protected abstract doRemoveMarker(marker: Marker): void;
 
-    protected abstract doCreatePolygon(definition: PolygonDefinition<PolygonOptions, InfoWindowOptions>): Polygon;
+    protected abstract doCreatePolygon({
+        definition,
+    }: { definition: PolygonDefinition<PolygonOptions, InfoWindowOptions> }): Polygon;
+
     protected abstract doRemovePolygon(polygon: Polygon): void;
 
-    protected abstract doCreatePolyline(definition: PolylineDefinition<PolylineOptions, InfoWindowOptions>): Polyline;
+    protected abstract doCreatePolyline({
+        definition,
+    }: { definition: PolylineDefinition<PolylineOptions, InfoWindowOptions> }): Polyline;
+
     protected abstract doRemovePolyline(polyline: Polyline): void;
 
     protected abstract doCreateInfoWindow({
@@ -306,5 +299,47 @@ export default abstract class<
         definition: InfoWindowWithoutPositionDefinition<InfoWindowOptions>;
         element: Marker | Polygon | Polyline;
     }): InfoWindow;
+    //endregion
+
+    //region Private APIs
+
+    private createDrawingFactory(
+        type: 'marker',
+        draws: typeof this.markers,
+        factory: typeof this.doCreateMarker
+    ): typeof this.doCreateMarker;
+    private createDrawingFactory(
+        type: 'polygon',
+        draws: typeof this.polygons,
+        factory: typeof this.doCreatePolygon
+    ): typeof this.doCreatePolygon;
+    private createDrawingFactory(
+        type: 'polyline',
+        draws: typeof this.polylines,
+        factory: typeof this.doCreatePolyline
+    ): typeof this.doCreatePolyline;
+    private createDrawingFactory<
+        Factory extends typeof this.doCreateMarker | typeof this.doCreatePolygon | typeof this.doCreatePolyline,
+        Draw extends ReturnType<Factory>,
+    >(
+        type: 'marker' | 'polygon' | 'polyline',
+        draws: globalThis.Map<WithIdentifier<any>, Draw>,
+        factory: Factory
+    ): Factory {
+        const eventBefore = `${type}:before-create`;
+        const eventAfter = `${type}:after-create`;
+
+        // @ts-expect-error IDK what to do with this error
+        // 'Factory' could be instantiated with an arbitrary type which could be unrelated to '({ definition }: { definition: WithIdentifier<any>; }) => Draw'
+        return ({ definition }: { definition: WithIdentifier<any> }) => {
+            this.dispatchEvent(eventBefore, { definition });
+            const drawing = factory(definition) as Draw;
+            this.dispatchEvent(eventAfter, { [type]: drawing });
+
+            draws.set(definition['@id'], drawing);
+
+            return drawing;
+        };
+    }
     //endregion
 }

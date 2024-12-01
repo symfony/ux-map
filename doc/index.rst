@@ -341,9 +341,7 @@ Usage with Live Components
 To use a Map inside a Live Component, you need to use the ``ComponentWithMapTrait`` trait
 and implement the method ``instantiateMap`` to return a ``Map`` instance.
 
-You can interact with the Map by using ``LiveAction`` attribute:
-
-.. code-block::
+You can interact with the Map by using ``LiveAction`` attribute::
 
     namespace App\Twig\Components;
 
@@ -382,9 +380,7 @@ Then, you can render the map with ``ux_map()`` in your component template:
     </div>
 
 Then, you can define `Live Actions`_ to interact with the map from the client-side.
-You can retrieve the map instance using the ``getMap()`` method, and change the map center, zoom, add markers, etc.
-
-.. code-block::
+You can retrieve the map instance using the ``getMap()`` method, and change the map center, zoom, add markers, etc::
 
         #[LiveAction]
         public function doSomething(): void

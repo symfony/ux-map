@@ -56,6 +56,13 @@ export default abstract class<MapOptions, Map, MarkerOptions, Marker, InfoWindow
     polygonsValue: Array<PolygonDefinition<PolygonOptions, InfoWindowOptions>>;
     polylinesValue: Array<PolylineDefinition<PolylineOptions, InfoWindowOptions>>;
     optionsValue: MapOptions;
+    hasCenterValue: boolean;
+    hasZoomValue: boolean;
+    hasFitBoundsToMarkersValue: boolean;
+    hasMarkersValue: boolean;
+    hasPolygonsValue: boolean;
+    hasPolylinesValue: boolean;
+    hasOptionsValue: boolean;
     protected map: Map;
     protected markers: globalThis.Map<string, Marker>;
     protected polygons: globalThis.Map<string, Polygon>;

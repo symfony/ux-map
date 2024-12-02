@@ -112,6 +112,14 @@ export default abstract class<
     declare polylinesValue: Array<PolylineDefinition<PolylineOptions, InfoWindowOptions>>;
     declare optionsValue: MapOptions;
 
+    declare hasCenterValue: boolean;
+    declare hasZoomValue: boolean;
+    declare hasFitBoundsToMarkersValue: boolean;
+    declare hasMarkersValue: boolean;
+    declare hasPolygonsValue: boolean;
+    declare hasPolylinesValue: boolean;
+    declare hasOptionsValue: boolean;
+
     protected map: Map;
     protected markers = new Map<Identifier, Marker>();
     protected polygons = new Map<Identifier, Polygon>();
@@ -140,7 +148,11 @@ export default abstract class<
         this.createPolygon = this.createDrawingFactory('polygon', this.polygons, this.doCreatePolygon.bind(this));
         this.createPolyline = this.createDrawingFactory('polyline', this.polylines, this.doCreatePolyline.bind(this));
 
-        this.map = this.doCreateMap({ center: this.centerValue, zoom: this.zoomValue, options });
+        this.map = this.doCreateMap({
+            center: this.hasCenterValue ? this.centerValue : null,
+            zoom: this.hasZoomValue ? this.zoomValue : null,
+            options,
+        });
         this.markersValue.forEach((definition) => this.createMarker({ definition }));
         this.polygonsValue.forEach((definition) => this.createPolygon({ definition }));
         this.polylinesValue.forEach((definition) => this.createPolyline({ definition }));

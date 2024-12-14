@@ -7,6 +7,10 @@
 -  Add `DistanceCalculatorInterface` interface and three implementations:
    `HaversineDistanceCalculator`, `SphericalCosineDistanceCalculator` and `VincentyDistanceCalculator`.
 -  Add `CoordinateUtils` helper, to convert decimal coordinates (`43.2109`) in DMS (`56° 78' 90"`)
+-  Add parameter `id` to `Marker`, `Polygon` and `Polyline` constructors
+-  Add method `Map::removeMarker(string|Marker $markerOrId)`
+-  Add method `Map::removePolygon(string|Polygon $polygonOrId)`
+-  Add method `Map::removePolyline(string|Polyline $polylineOrId)`
 
 ## 2.22
 

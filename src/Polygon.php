@@ -18,7 +18,7 @@ use Symfony\UX\Map\Exception\InvalidArgumentException;
  *
  * @author [Pierre Svgnt]
  */
-final readonly class Polygon
+final readonly class Polygon implements Element
 {
     /**
      * @param array<string, mixed> $extra Extra data, can be used by the developer to store additional information and use them later JavaScript side
@@ -28,6 +28,7 @@ final readonly class Polygon
         private ?string $title = null,
         private ?InfoWindow $infoWindow = null,
         private array $extra = [],
+        public ?string $id = null,
     ) {
     }
 
@@ -39,6 +40,7 @@ final readonly class Polygon
      *     title: string|null,
      *     infoWindow: array<string, mixed>|null,
      *     extra: array,
+     *     id: string|null
      * }
      */
     public function toArray(): array
@@ -48,6 +50,7 @@ final readonly class Polygon
             'title' => $this->title,
             'infoWindow' => $this->infoWindow?->toArray(),
             'extra' => $this->extra,
+            'id' => $this->id,
         ];
     }
 
@@ -57,6 +60,7 @@ final readonly class Polygon
      *     title: string|null,
      *     infoWindow: array<string, mixed>|null,
      *     extra: array,
+     *     id: string|null
      * } $polygon
      *
      * @internal

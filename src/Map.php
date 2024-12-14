@@ -20,27 +20,28 @@ use Symfony\UX\Map\Exception\InvalidArgumentException;
  */
 final class Map
 {
+    private Markers $markers;
+    private Polygons $polygons;
+    private Polylines $polylines;
+
+    /**
+     * @param Marker[]   $markers
+     * @param Polygon[]  $polygons
+     * @param Polyline[] $polylines
+     */
     public function __construct(
         private readonly ?string $rendererName = null,
         private ?MapOptionsInterface $options = null,
         private ?Point $center = null,
         private ?float $zoom = null,
         private bool $fitBoundsToMarkers = false,
-        /**
-         * @var array<Marker>
-         */
-        private array $markers = [],
-
-        /**
-         * @var array<Polygon>
-         */
-        private array $polygons = [],
-
-        /**
-         * @var array<Polyline>
-         */
-        private array $polylines = [],
+        array $markers = [],
+        array $polygons = [],
+        array $polylines = [],
     ) {
+        $this->markers = new Markers($markers);
+        $this->polygons = new Polygons($polygons);
+        $this->polylines = new Polylines($polylines);
     }
 
     public function getRendererName(): ?string
@@ -88,21 +89,42 @@ final class Map
 
     public function addMarker(Marker $marker): self
     {
-        $this->markers[] = $marker;
+        $this->markers->add($marker);
+
+        return $this;
+    }
+
+    public function removeMarker(Marker|string $markerOrId): self
+    {
+        $this->markers->remove($markerOrId);
 
         return $this;
     }
 
     public function addPolygon(Polygon $polygon): self
     {
-        $this->polygons[] = $polygon;
+        $this->polygons->add($polygon);
+
+        return $this;
+    }
+
+    public function removePolygon(Polygon|string $polygonOrId): self
+    {
+        $this->polygons->remove($polygonOrId);
 
         return $this;
     }
 
     public function addPolyline(Polyline $polyline): self
     {
-        $this->polylines[] = $polyline;
+        $this->polylines->add($polyline);
+
+        return $this;
+    }
+
+    public function removePolyline(Polyline|string $polylineOrId): self
+    {
+        $this->polylines->remove($polylineOrId);
 
         return $this;
     }
@@ -124,9 +146,9 @@ final class Map
             'zoom' => $this->zoom,
             'fitBoundsToMarkers' => $this->fitBoundsToMarkers,
             'options' => $this->options ? MapOptionsNormalizer::normalize($this->options) : [],
-            'markers' => array_map(static fn (Marker $marker) => $marker->toArray(), $this->markers),
-            'polygons' => array_map(static fn (Polygon $polygon) => $polygon->toArray(), $this->polygons),
-            'polylines' => array_map(static fn (Polyline $polyline) => $polyline->toArray(), $this->polylines),
+            'markers' => $this->markers->toArray(),
+            'polygons' => $this->polygons->toArray(),
+            'polylines' => $this->polylines->toArray(),
         ];
     }
 

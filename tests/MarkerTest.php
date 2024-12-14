@@ -31,6 +31,7 @@ class MarkerTest extends TestCase
             'title' => null,
             'infoWindow' => null,
             'extra' => $array['extra'],
+            'id' => null,
         ], $array);
 
         $marker = new Marker(
@@ -57,6 +58,7 @@ class MarkerTest extends TestCase
                 'extra' => $array['infoWindow']['extra'],
             ],
             'extra' => $array['extra'],
+            'id' => null,
         ], $array);
     }
 }

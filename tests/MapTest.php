@@ -187,6 +187,7 @@ class MapTest extends TestCase
                         'extra' => ['baz' => 'qux'],
                     ],
                     'extra' => ['foo' => 'bar'],
+                    'id' => null,
                 ],
                 [
                     'position' => ['lat' => 45.764, 'lng' => 4.8357],
@@ -200,6 +201,7 @@ class MapTest extends TestCase
                         'extra' => [],
                     ],
                     'extra' => [],
+                    'id' => null,
                 ],
                 [
                     'position' => ['lat' => 43.2965, 'lng' => 5.3698],
@@ -213,6 +215,7 @@ class MapTest extends TestCase
                         'extra' => [],
                     ],
                     'extra' => [],
+                    'id' => null,
                 ],
             ],
             'polygons' => [
@@ -225,6 +228,7 @@ class MapTest extends TestCase
                     'title' => 'Polygon 1',
                     'infoWindow' => null,
                     'extra' => [],
+                    'id' => null,
                 ],
                 [
                     'points' => [
@@ -242,6 +246,7 @@ class MapTest extends TestCase
                         'extra' => [],
                     ],
                     'extra' => [],
+                    'id' => null,
                 ],
             ],
             'polylines' => [
@@ -254,6 +259,7 @@ class MapTest extends TestCase
                     'title' => 'Polyline 1',
                     'infoWindow' => null,
                     'extra' => [],
+                    'id' => null,
                 ],
                 [
                     'points' => [
@@ -271,6 +277,7 @@ class MapTest extends TestCase
                         'extra' => [],
                     ],
                     'extra' => [],
+                    'id' => null,
                 ],
             ],
         ], $map->toArray());

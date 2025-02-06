@@ -36,6 +36,20 @@ class PointTest extends TestCase
         new Point($latitude, $longitude);
     }
 
+    public function testGetLatitude(): void
+    {
+        $point = new Point(48.8566, 2.3533);
+
+        self::assertSame(48.8566, $point->getLatitude());
+    }
+
+    public function testGetLongitude(): void
+    {
+        $point = new Point(48.8566, 2.3533);
+
+        self::assertSame(2.3533, $point->getLongitude());
+    }
+
     public function testToArray(): void
     {
         $point = new Point(48.8566, 2.3533);

@@ -1,5 +1,13 @@
 # CHANGELOG
  
+## 2.23
+
+-  Add `DistanceUnit` to represent distance units (`m`, `km`, `miles`, `nmi`) and
+   ease conversion between units.
+-  Add `DistanceCalculatorInterface` interface and three implementations:
+   `HaversineDistanceCalculator`, `SphericalCosineDistanceCalculator` and `VincentyDistanceCalculator`.
+-  Add `CoordinateUtils` helper, to convert decimal coordinates (`43.2109`) in DMS (`56° 78' 90"`)
+
 ## 2.22
 
 -   Add method `Symfony\UX\Map\Renderer\AbstractRenderer::tapOptions()`, to allow Renderer to modify options before rendering a Map.

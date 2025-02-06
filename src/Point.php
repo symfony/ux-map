@@ -33,6 +33,16 @@ final readonly class Point
         }
     }
 
+    public function getLatitude(): float
+    {
+        return $this->latitude;
+    }
+
+    public function getLongitude(): float
+    {
+        return $this->longitude;
+    }
+
     /**
      * @return array{lat: float, lng: float}
      */

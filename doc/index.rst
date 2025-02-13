@@ -108,6 +108,10 @@ You can add markers to a map using the ``addMarker()`` method::
             infoWindow: new InfoWindow(
                 headerContent: '<b>Lyon</b>',
                 content: 'The French town in the historic Rhône-Alpes region, located at the junction of the Rhône and Saône rivers.'
+            ),
+            icon: new Icon(
+                content: '<svg>....</svg>'
+                icontType: 'html'
             )
         ))
 
@@ -127,6 +131,25 @@ You can add markers to a map using the ``addMarker()`` method::
             ),
         ))
     ;
+
+Add Marker icons
+~~~~~~~~~~~~~~~~
+
+.. versionadded:: 2.24
+
+    ``Marker`` icon customizatisation is available since UX Map 2.24.
+When returning a Map, it's quite common to want to customize ``Marker`` icon. It is possible thanks to ``icon`` parameter and ``Icon`` class::
+    
+        // It can be a UX Icon (requires `symfony/ux-icons`)
+        $icon = Icon::fromUxIcon('fa:map-marker');
+        // Or an URL pointing to an image
+        $icon = Icon::fromUrl('https://example.com/marker.png');
+        // Or a plain SVG content
+        $icon = Icon::fromInlineSVG('<svg>(...)</svg>');
+        new Marker(
+            // ...
+            icon: $icon
+))
 
 Remove elements from Map
 ~~~~~~~~~~~~~~~~~~~~~~~~

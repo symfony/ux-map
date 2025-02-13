@@ -3,6 +3,12 @@ export type Point = {
     lat: number;
     lng: number;
 };
+export type Icon = {
+    content: string;
+    type: 'url' | 'inline-svg' | 'ux-icon';
+    width: number;
+    height: number;
+};
 export type Identifier = string;
 export type WithIdentifier<T extends Record<string, unknown>> = T & {
     '@id': Identifier;
@@ -11,6 +17,7 @@ export type MarkerDefinition<MarkerOptions, InfoWindowOptions> = WithIdentifier<
     position: Point;
     title: string | null;
     infoWindow?: InfoWindowWithoutPositionDefinition<InfoWindowOptions>;
+    icon?: Icon;
     rawOptions?: MarkerOptions;
     extra: Record<string, unknown>;
 }>;
@@ -105,6 +112,10 @@ export default abstract class<MapOptions, Map, MarkerOptions, Marker, InfoWindow
         definition: InfoWindowWithoutPositionDefinition<InfoWindowOptions>;
         element: Marker | Polygon | Polyline;
     }): InfoWindow;
+    protected abstract doCreateIcon({ definition, element, }: {
+        definition: Icon;
+        element: Marker;
+    }): void;
     private createDrawingFactory;
     private onDrawChanged;
 }

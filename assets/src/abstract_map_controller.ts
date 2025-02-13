@@ -1,7 +1,12 @@
 import { Controller } from '@hotwired/stimulus';
 
 export type Point = { lat: number; lng: number };
-
+export type Icon = {
+    content: string;
+    type: 'url' | 'inline-svg' | 'ux-icon';
+    width: number;
+    height: number;
+};
 export type Identifier = string;
 export type WithIdentifier<T extends Record<string, unknown>> = T & { '@id': Identifier };
 
@@ -9,6 +14,7 @@ export type MarkerDefinition<MarkerOptions, InfoWindowOptions> = WithIdentifier<
     position: Point;
     title: string | null;
     infoWindow?: InfoWindowWithoutPositionDefinition<InfoWindowOptions>;
+    icon?: Icon;
     /**
      * Raw options passed to the marker constructor, specific to the map provider (e.g.: `L.marker()` for Leaflet).
      */
@@ -268,6 +274,13 @@ export default abstract class<
         definition: InfoWindowWithoutPositionDefinition<InfoWindowOptions>;
         element: Marker | Polygon | Polyline;
     }): InfoWindow;
+    protected abstract doCreateIcon({
+        definition,
+        element,
+    }: {
+        definition: Icon;
+        element: Marker;
+    }): void;
 
     //endregion
 

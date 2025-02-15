@@ -15,6 +15,8 @@ namespace Symfony\UX\Map;
  * Represents a Polyline collection.
  *
  * @author Sylvain Blondeau <contact@sylvainblondeau.dev>
+ *
+ * @internal
  */
 final class Polylines extends Elements
 {

@@ -26,8 +26,8 @@ final class Map
 
     /**
      * @param Marker[]   $markers
+     * @param Polygon[]  $polygons
      * @param Polyline[] $polylines
-     * @param Polygone[] $polygons
      */
     public function __construct(
         private readonly ?string $rendererName = null,
@@ -40,8 +40,8 @@ final class Map
         array $polylines = [],
     ) {
         $this->markers = new Markers($markers);
-        $this->polylines = new Polylines($polylines);
         $this->polygons = new Polygons($polygons);
+        $this->polylines = new Polylines($polylines);
     }
 
     public function getRendererName(): ?string

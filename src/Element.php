@@ -11,6 +11,11 @@
 
 namespace Symfony\UX\Map;
 
+/**
+ * @author Sylvain Blondeau <contact@sylvainblondeau.dev>
+ *
+ * @internal
+ */
 interface Element
 {
 }

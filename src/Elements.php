@@ -15,10 +15,12 @@ namespace Symfony\UX\Map;
  * Represents a collection of map elements.
  *
  * @author Sylvain Blondeau <contact@sylvainblondeau.dev>
+ *
+ * @internal
  */
 abstract class Elements
 {
-    protected \SplObjectStorage $elements;
+    private \SplObjectStorage $elements;
 
     public function __construct(
         array $elements,
@@ -29,7 +31,7 @@ abstract class Elements
         }
     }
 
-    public function add(Element $element): self
+    public function add(Element $element): static
     {
         $this->elements->attach($element, $element->id ?? $this->elements->getHash($element));
 
@@ -47,7 +49,7 @@ abstract class Elements
         return null;
     }
 
-    public function remove(Element|string $elementOrId): self
+    public function remove(Element|string $elementOrId): static
     {
         if (\is_string($elementOrId)) {
             $elementOrId = $this->getElement($elementOrId);

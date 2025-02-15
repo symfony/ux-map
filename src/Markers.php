@@ -15,6 +15,8 @@ namespace Symfony\UX\Map;
  * Represents a Marker collection.
  *
  * @author Sylvain Blondeau <contact@sylvainblondeau.dev>
+ *
+ * @internal
  */
 final class Markers extends Elements
 {

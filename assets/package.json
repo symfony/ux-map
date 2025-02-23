@@ -1,9 +1,20 @@
 {
     "name": "@symfony/ux-map",
-    "description": "Integrates interactive maps in your Symfony applications",
+    "description": "Easily embed interactive maps in your Symfony application.",
     "license": "MIT",
-    "version": "1.0.0",
+    "version": "2.23.0",
+    "keywords": [
+        "symfony-ux",
+        "map",
+        "markers",
+        "maps"
+    ],
+    "homepage": "https://ux.symfony.com/map",
+    "repository": "https://github.com/symfony/ux-map/tree/2.x",
     "type": "module",
+    "files": [
+        "dist"
+    ],
     "main": "dist/abstract_map_controller.js",
     "types": "dist/abstract_map_controller.d.ts",
     "scripts": {

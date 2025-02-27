@@ -10,7 +10,7 @@
         "maps"
     ],
     "homepage": "https://ux.symfony.com/map",
-    "repository": "https://github.com/symfony/ux-map/tree/2.x",
+    "repository": "https://github.com/symfony/ux-map",
     "type": "module",
     "files": [
         "dist"

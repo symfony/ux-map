@@ -1,6 +1,7 @@
 {
     "name": "@symfony/ux-map",
     "description": "Easily embed interactive maps in your Symfony application.",
+    "private": true,
     "license": "MIT",
     "version": "2.23.0",
     "keywords": [

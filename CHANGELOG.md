@@ -1,5 +1,9 @@
 # CHANGELOG
- 
+
+## 2.24
+
+-  Installing the package in a Symfony app using Flex won't add the `@symfony/ux-map` dependency to the `package.json` file anymore.
+
 ## 2.23
 
 -  Add `DistanceUnit` to represent distance units (`m`, `km`, `miles`, `nmi`) and

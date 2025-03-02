@@ -16,14 +16,6 @@ Install the bundle using Composer and Symfony Flex:
 
     $ composer require symfony/ux-map
 
-If you're using WebpackEncore, install your assets and restart Encore (not
-needed if you're using AssetMapper):
-
-.. code-block:: terminal
-
-    $ npm install --force
-    $ npm run watch
-
 Configuration
 -------------
 
@@ -140,25 +132,25 @@ Remove elements from Map
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 It is possible to remove elements like ``Marker``, ``Polygon`` and ``Polyline`` instances by using ``Map::remove*()`` methods::
-    
+
     // Add elements
     $map->addMarker($marker = new Marker(/* ... */));
     $map->addPolygon($polygon = new Polygon(/* ... */));
     $map->addPolyline($polyline = new Polyline(/* ... */));
-    
+
     // And later, remove those elements
     $map->removeMarker($marker);
     $map->removePolygon($polygon);
     $map->removePolyline($polyline);
-    
+
 If unfortunately you were unable to store an element instance, you can still remove them by passing the identifier string::
- 
+
     $map = new Map(/* ... */);
     // Add elements
     $map->addMarker(new Marker(id: 'my-marker', /* ... */));
     $map->addPolygon(new Polygon(id: 'my-polygon', /* ... */));
     $map->addPolyline(new Polyline(id: 'my-marker', /* ... */));
-    
+
     // And later, remove those elements
     $map->removeMarker('my-marker');
     $map->removePolygon('my-polygon');

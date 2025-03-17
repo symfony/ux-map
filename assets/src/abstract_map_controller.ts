@@ -1,14 +1,21 @@
 import { Controller } from '@hotwired/stimulus';
 
 export type Point = { lat: number; lng: number };
+export type Identifier = string;
+export type WithIdentifier<T extends Record<string, unknown>> = T & { '@id': Identifier };
+
+export const IconTypes = {
+    Url: 'url',
+    InlineSvg: 'inline-svg',
+    UxIcon: 'ux-icon',
+} as const;
+export type IconType = (typeof IconTypes)[keyof typeof IconTypes];
 export type Icon = {
     content: string;
-    type: 'url' | 'inline-svg' | 'ux-icon';
+    type: IconType;
     width: number;
     height: number;
 };
-export type Identifier = string;
-export type WithIdentifier<T extends Record<string, unknown>> = T & { '@id': Identifier };
 
 export type MarkerDefinition<MarkerOptions, InfoWindowOptions> = WithIdentifier<{
     position: Point;

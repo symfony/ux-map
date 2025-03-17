@@ -12,10 +12,13 @@
 namespace Symfony\UX\Map\Icon;
 
 /**
- * Represents an URL icon.
+ * Represents an inline SVG icon.
  *
- * @author Sylvain Blondeau <contact@sylvainblondeau.dev>
+ * @author Hugo Alliaume <hugo@alliau.me>
  */
-class Url extends Icon
+enum IconType: string
 {
+    case Url = 'url';
+    case Svg = 'svg';
+    case UxIcon = 'ux-icon';
 }

@@ -137,19 +137,24 @@ Add Marker icons
 
 .. versionadded:: 2.24
 
-    ``Marker`` icon customizatisation is available since UX Map 2.24.
-When returning a Map, it's quite common to want to customize ``Marker`` icon. It is possible thanks to ``icon`` parameter and ``Icon`` class::
-    
-        // It can be a UX Icon (requires `symfony/ux-icons`)
-        $icon = Icon::fromUxIcon('fa:map-marker');
+    ``Marker`` icon customization is available since UX Map 2.24.
+
+A ``Marker`` can be customized with an ``Icon`` instance, which can either be an UX Icon, an URL, or a SVG content::
+
+        // It can be a UX Icon (requires `symfony/ux-icons` package)
+        $icon = Icon::ux('fa:map-marker');
         // Or an URL pointing to an image
-        $icon = Icon::fromUrl('https://example.com/marker.png');
+        $icon = Icon::url('https://example.com/marker.png');
         // Or a plain SVG content
-        $icon = Icon::fromInlineSVG('<svg>(...)</svg>');
-        new Marker(
+        $icon = Icon::svg('<svg>(...)</svg>');
+
+        // Configure the icon size with the `width()` and `height()` methods
+        $icon = Icon::ux('fa:map-marker')->width(48)->height(48);
+
+        $map->addMarker(new Marker(
             // ...
             icon: $icon
-))
+        ));
 
 Remove elements from Map
 ~~~~~~~~~~~~~~~~~~~~~~~~

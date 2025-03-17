@@ -13,38 +13,54 @@ namespace Symfony\UX\Map\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\UX\Map\Icon\Icon;
-use Symfony\UX\Map\Icon\InlineSvg;
-use Symfony\UX\Map\Icon\Url;
+use Symfony\UX\Map\Icon\SvgIcon;
+use Symfony\UX\Map\Icon\UrlIcon;
 use Symfony\UX\Map\Icon\UxIcon;
 
 class IconTest extends TestCase
 {
-    public function testIconConstruction(): void
+    public static function provideIcons(): iterable
     {
-        self::assertInstanceOf(Url::class, Icon::fromUrl(url: 'https://image.png'));
-        self::assertInstanceOf(InlineSvg::class, Icon::fromInlineSVG(html: '<svg></svg>'));
-        self::assertInstanceOf(UxIcon::class, Icon::fromUxIcon(name: 'bi:heart'));
+        yield 'url' => [
+            'icon' => Icon::url('https://image.png')->width(12)->height(12),
+            'expectedInstance' => UrlIcon::class,
+            'expectedToArray' => ['type' => 'url', 'width' => 12, 'height' => 12, 'url' => 'https://image.png'],
+        ];
+        yield 'svg' => [
+            'icon' => Icon::svg('<svg></svg>'),
+            'expectedInstance' => SvgIcon::class,
+            'expectedToArray' => ['type' => 'svg', 'width' => 24, 'height' => 24, 'html' => '<svg></svg>'],
+        ];
+        yield 'ux' => [
+            'icon' => Icon::ux('bi:heart')->width(48)->height(48),
+            'expectedInstance' => UxIcon::class,
+            'expectedToArray' => ['type' => 'ux-icon', 'width' => 48, 'height' => 48, 'name' => 'bi:heart'],
+        ];
     }
 
-    public function testToArray(): void
+    /**
+     * @dataProvider provideIcons
+     *
+     * @param class-string<Icon> $expectedInstance
+     */
+    public function testIconConstruction(Icon $icon, string $expectedInstance, array $expectedToArray): void
     {
-        $urlIcon = Icon::fromUrl(url: 'https://image.png');
-        $array = $urlIcon->toArray();
-
-        self::assertSame([
-            'content' => 'https://image.png',
-            'type' => 'url',
-            'width' => 24,
-            'height' => 24,
-        ], $array);
+        self::assertInstanceOf($expectedInstance, $icon);
     }
 
-    public function testFromArray(): void
+    /**
+     * @dataProvider provideIcons
+     */
+    public function testToArray(Icon $icon, string $expectedInstance, array $expectedToArray): void
     {
-        $urlIcon = Icon::fromUrl(url: 'https://image.png');
-        $array = $urlIcon->toArray();
+        self::assertSame($expectedToArray, $icon->toArray());
+    }
 
-        self::assertEquals(
-            $urlIcon, Icon::fromArray($array));
+    /**
+     * @dataProvider provideIcons
+     */
+    public function testFromArray(Icon $icon, string $expectedInstance, array $expectedToArray): void
+    {
+        self::assertEquals($icon, Icon::fromArray($expectedToArray));
     }
 }

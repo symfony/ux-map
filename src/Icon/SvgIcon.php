@@ -12,32 +12,35 @@
 namespace Symfony\UX\Map\Icon;
 
 /**
- * Represents an UX icon.
+ * Represents an inline SVG icon.
  *
  * @author Sylvain Blondeau <contact@sylvainblondeau.dev>
  * @author Hugo Alliaume <hugo@alliau.me>
  *
  * @internal
  */
-class UxIcon extends Icon
+class SvgIcon extends Icon
 {
     /**
-     * @param non-empty-string $name
+     * @param non-empty-string $html
      * @param positive-int     $width
      * @param positive-int     $height
      */
     protected function __construct(
-        protected string $name,
+        protected string $html,
         int $width = 24,
         int $height = 24,
     ) {
-        parent::__construct(IconType::UxIcon, $width, $height);
+        parent::__construct(IconType::Svg, $width, $height);
     }
 
+    /**
+     * @param array{ html: string, width: positive-int, height: positive-int } $data
+     */
     public static function fromArray(array $data): static
     {
         return new self(
-            name: $data['name'],
+            html: $data['html'],
             width: $data['width'],
             height: $data['height'],
         );
@@ -47,7 +50,7 @@ class UxIcon extends Icon
     {
         return [
             ...parent::toArray(),
-            'name' => $this->name,
+            'html' => $this->html,
         ];
     }
 }

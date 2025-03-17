@@ -44,7 +44,7 @@ class MarkerTest extends TestCase
                 content: "Capitale de la France, est une grande ville européenne et un centre mondial de l'art, de la mode, de la gastronomie et de la culture.",
                 opened: true,
             ),
-            icon: Icon::fromUrl('https://example.com/image.png'),
+            icon: Icon::url('https://example.com/image.png'),
         );
 
         $array = $marker->toArray();
@@ -61,10 +61,10 @@ class MarkerTest extends TestCase
                 'extra' => $array['infoWindow']['extra'],
             ],
             'icon' => [
-                'content' => 'https://example.com/image.png',
                 'type' => 'url',
                 'width' => 24,
                 'height' => 24,
+                'url' => 'https://example.com/image.png',
             ],
             'extra' => $array['extra'],
             'id' => null,

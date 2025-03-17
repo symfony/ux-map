@@ -17,77 +17,93 @@ use Symfony\UX\Map\Exception\InvalidArgumentException;
  * Represents an icon that can be displayed on a map marker.
  *
  * @author Sylvain Blondeau <contact@sylvainblondeau.dev>
+ * @author Hugo Alliaume <hugo@alliau.me>
  */
-class Icon
+abstract class Icon
 {
-    public const TYPE_URL = 'url';
-    public const TYPE_INLINE_SVG = 'inline-svg';
-    public const TYPE_UX_ICON = 'ux-icon';
+    /**
+     * @param non-empty-string $url
+     */
+    public static function url(string $url): UrlIcon
+    {
+        return new UrlIcon($url);
+    }
 
-    private function __construct(
-        public string $content,
-        public string $type,
-        public int $width = 24,
-        public int $height = 24,
+    /**
+     * @param non-empty-string $html
+     */
+    public static function svg(string $html): SvgIcon
+    {
+        return new SvgIcon($html);
+    }
+
+    /**
+     * @param non-empty-string $name
+     */
+    public static function ux(string $name): UxIcon
+    {
+        return new UxIcon($name);
+    }
+
+    /**
+     * @param positive-int $width
+     * @param positive-int $height
+     */
+    protected function __construct(
+        protected IconType $type,
+        protected int $width = 24,
+        protected int $height = 24,
     ) {
     }
 
+    public function width(int $width): static
+    {
+        if ($width <= 0) {
+            throw new InvalidArgumentException('Width must be greater than 0.');
+        }
+
+        $this->width = $width;
+
+        return $this;
+    }
+
+    public function height(int $height): static
+    {
+        if ($height <= 0) {
+            throw new InvalidArgumentException('Height must be greater than 0.');
+        }
+
+        $this->height = $height;
+
+        return $this;
+    }
+
+    /**
+     * @internal
+     */
     public function toArray(): array
     {
         return [
-            'content' => $this->content,
-            'type' => $this->type,
+            'type' => $this->type->value,
             'width' => $this->width,
             'height' => $this->height,
         ];
     }
 
-    public static function fromUrl(string $url, int $width = 24, int $height = 24): Url
-    {
-        return new Url(
-            content: $url,
-            type: self::TYPE_URL,
-            width: $width,
-            height: $height
-        );
-    }
-
-    public static function fromInlineSVG(string $html, int $width = 24, int $height = 24): InlineSvg
-    {
-        return new InlineSvg(
-            content: $html,
-            type: self::TYPE_INLINE_SVG,
-            width: $width,
-            height: $height
-        );
-    }
-
-    public static function fromUxIcon(string $name, int $width = 24, int $height = 24): UxIcon
-    {
-        return new UxIcon(
-            content: $name,
-            type: self::TYPE_UX_ICON,
-            width: $width,
-            height: $height
-        );
-    }
-
     /**
-     * @param array{
-     *     content: string,
-     *     type: string,
-     *     width: int,
-     *     height: int,
-     * } $data
+     * @param array{ type: value-of<IconType>, width: positive-int, height: positive-int }
+     *     &(array{ url: non-empty-string }
+     *      |array{ html: non-empty-string }
+     *      |array{ name: non-empty-string }) $data
      *
      * @internal
      */
     public static function fromArray(array $data): static
     {
         return match ($data['type']) {
-            'url' => self::fromUrl($data['content'], (int) $data['width'], (int) $data['height']),
-            'inline-svg' => self::fromInlineSvg($data['content'], (int) $data['width'], (int) $data['height']),
-            'ux-icon' => self::fromUxIcon($data['content'], (int) $data['width'], (int) $data['height']),
+            IconType::Url->value => UrlIcon::fromArray($data),
+            IconType::Svg->value => SvgIcon::fromArray($data),
+            IconType::UxIcon->value => UxIcon::fromArray($data),
             default => throw new InvalidArgumentException(\sprintf('Invalid icon type %s.', $data['type'])),
         };
     }

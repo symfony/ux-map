@@ -21,7 +21,7 @@ use Symfony\UX\Icons\IconRendererInterface;
 readonly class UxIconRenderer
 {
     public function __construct(
-        private readonly ?IconRendererInterface $renderer,
+        private ?IconRendererInterface $renderer,
     ) {
     }
 

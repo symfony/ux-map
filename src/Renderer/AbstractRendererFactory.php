@@ -22,7 +22,7 @@ abstract class AbstractRendererFactory
 {
     public function __construct(
         protected StimulusHelper $stimulus,
-        protected ?UxIconRenderer $uxIconRenderer = null,
+        protected UxIconRenderer $uxIconRenderer,
     ) {
     }
 

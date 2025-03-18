@@ -39,7 +39,7 @@ return static function (ContainerConfigurator $container): void {
             ->abstract()
             ->args([
                 service('stimulus.helper'),
-                service('.ux_map.ux_icons.renderer')->nullOnInvalid(),
+                service('.ux_map.ux_icons.renderer'),
             ])
 
         ->set('ux_map.renderer_factory', Renderer::class)

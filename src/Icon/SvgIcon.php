@@ -23,27 +23,37 @@ class SvgIcon extends Icon
 {
     /**
      * @param non-empty-string $html
-     * @param positive-int     $width
-     * @param positive-int     $height
      */
     protected function __construct(
         protected string $html,
-        int $width = 24,
-        int $height = 24,
     ) {
-        parent::__construct(IconType::Svg, $width, $height);
+        parent::__construct(IconType::Svg);
     }
 
     /**
-     * @param array{ html: string, width: positive-int, height: positive-int } $data
+     * @param array{ html: string } $data
      */
     public static function fromArray(array $data): static
     {
         return new self(
             html: $data['html'],
-            width: $data['width'],
-            height: $data['height'],
         );
+    }
+
+    /**
+     * @throws \LogicException the SvgIcon can not be customized
+     */
+    public function width(int $width): never
+    {
+        throw new \LogicException('Unable to configure the SvgIcon width, please configure it in the HTML with the "width" attribute on the root element instead.');
+    }
+
+    /**
+     * @throws \LogicException the SvgIcon can not be customized
+     */
+    public function height(int $height): never
+    {
+        throw new \LogicException('Unable to configure the SvgIcon height, please configure it in the HTML with the "height" attribute on the root element instead.');
     }
 
     public function toArray(): array

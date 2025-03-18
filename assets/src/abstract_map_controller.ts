@@ -6,16 +6,27 @@ export type WithIdentifier<T extends Record<string, unknown>> = T & { '@id': Ide
 
 export const IconTypes = {
     Url: 'url',
-    InlineSvg: 'inline-svg',
+    Svg: 'svg',
     UxIcon: 'ux-icon',
 } as const;
-export type IconType = (typeof IconTypes)[keyof typeof IconTypes];
 export type Icon = {
-    content: string;
-    type: IconType;
     width: number;
     height: number;
-};
+} & (
+    | {
+          type: typeof IconTypes.UxIcon;
+          name: string;
+          _generated_html: string,
+      }
+    | {
+          type: typeof IconTypes.Url;
+          url: string;
+      }
+    | {
+          type: typeof IconTypes.Svg;
+          html: string;
+      }
+    );
 
 export type MarkerDefinition<MarkerOptions, InfoWindowOptions> = WithIdentifier<{
     position: Point;

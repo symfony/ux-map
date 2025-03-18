@@ -16,7 +16,7 @@ export type Icon = {
     | {
           type: typeof IconTypes.UxIcon;
           name: string;
-          _generated_html: string,
+          _generated_html: string;
       }
     | {
           type: typeof IconTypes.Url;
@@ -26,7 +26,7 @@ export type Icon = {
           type: typeof IconTypes.Svg;
           html: string;
       }
-    );
+);
 
 export type MarkerDefinition<MarkerOptions, InfoWindowOptions> = WithIdentifier<{
     position: Point;

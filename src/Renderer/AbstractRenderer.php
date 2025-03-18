@@ -92,13 +92,13 @@ abstract readonly class AbstractRenderer implements RendererInterface
         $attrs = $map->toArray();
 
         foreach ($attrs['markers'] as $key => $marker) {
-            $attrs['markers'][$key]['@id'] = $computeId($marker);
             if (isset($marker['icon']['type']) && IconType::UxIcon->value === $marker['icon']['type']) {
                 $attrs['markers'][$key]['icon']['_generated_html'] = $this->uxIconRenderer->render($marker['icon']['name'], [
                     'width' => $marker['icon']['width'],
                     'height' => $marker['icon']['height'],
                 ]);
             }
+            $attrs['markers'][$key]['@id'] = $computeId($marker);
         }
         foreach ($attrs['polygons'] as $key => $polygon) {
             $attrs['polygons'][$key]['@id'] = $computeId($polygon);

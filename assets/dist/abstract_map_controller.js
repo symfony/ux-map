@@ -2,7 +2,7 @@ import { Controller } from '@hotwired/stimulus';
 
 const IconTypes = {
     Url: 'url',
-    InlineSvg: 'inline-svg',
+    Svg: 'svg',
     UxIcon: 'ux-icon',
 };
 class default_1 extends Controller {

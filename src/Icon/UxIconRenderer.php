@@ -25,7 +25,10 @@ readonly class UxIconRenderer
     ) {
     }
 
-    public function render(string $name): string
+    /**
+     * @param array<string, string|bool> $attributes
+     */
+    public function render(string $name, array $attributes = []): string
     {
         if (null === $this->renderer) {
             throw new \LogicException('You cannot use an UX Icon as the "UX Icons" package is not installed. Try running "composer require symfony/ux-icons" to install it.');
@@ -33,6 +36,7 @@ readonly class UxIconRenderer
 
         return $this->renderer->renderIcon($name, [
             'xmlns' => 'http://www.w3.org/2000/svg',
+            ...$attributes,
         ]);
     }
 }

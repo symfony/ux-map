@@ -22,6 +22,8 @@ use Symfony\UX\Map\Exception\InvalidArgumentException;
 abstract class Icon
 {
     /**
+     * Creates a new icon based on a URL (e.g.: `https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/icons/geo-alt.svg`).
+     *
      * @param non-empty-string $url
      */
     public static function url(string $url): UrlIcon
@@ -30,6 +32,10 @@ abstract class Icon
     }
 
     /**
+     * Creates a new icon based on an SVG string (e.g.: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">...</svg>`).
+     * Using an SVG string may not be the best option if you want to customize the icon afterward,
+     * it would be preferable to use {@see Icon::ux()} or {@see Icon::url()} instead.
+     *
      * @param non-empty-string $html
      */
     public static function svg(string $html): SvgIcon
@@ -38,6 +44,8 @@ abstract class Icon
     }
 
     /**
+     * Creates a new icon based on a UX icon name (e.g.: `fa:map-marker`).
+     *
      * @param non-empty-string $name
      */
     public static function ux(string $name): UxIcon
@@ -56,23 +64,25 @@ abstract class Icon
     ) {
     }
 
+    /**
+     * Sets the width of the icon.
+     *
+     * @param positive-int $width
+     */
     public function width(int $width): static
     {
-        if ($width <= 0) {
-            throw new InvalidArgumentException('Width must be greater than 0.');
-        }
-
         $this->width = $width;
 
         return $this;
     }
 
+    /**
+     * Sets the height of the icon.
+     *
+     * @param positive-int $height
+     */
     public function height(int $height): static
     {
-        if ($height <= 0) {
-            throw new InvalidArgumentException('Height must be greater than 0.');
-        }
-
         $this->height = $height;
 
         return $this;

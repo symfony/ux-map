@@ -13,6 +13,7 @@ namespace Symfony\UX\Map;
 
 use Symfony\UX\Map\Exception\InvalidArgumentException;
 use Symfony\UX\Map\Icon\Icon;
+use Symfony\UX\Map\Icon\IconType;
 
 /**
  * Represents a marker on a map.
@@ -40,7 +41,7 @@ final readonly class Marker implements Element
      *     position: array{lat: float, lng: float},
      *     title: string|null,
      *     infoWindow: array<string, mixed>|null,
-     *     icon: Icon|null,
+     *     icon: array{type: value-of<IconType>, width: positive-int, height: positive-int, ...}|null,
      *     extra: array,
      *     id: string|null
      * }
@@ -62,7 +63,7 @@ final readonly class Marker implements Element
      *     position: array{lat: float, lng: float},
      *     title: string|null,
      *     infoWindow: array<string, mixed>|null,
-     *     icon: array<string, mixed>||null,
+     *     icon: array{type: value-of<IconType>, width: positive-int, height: positive-int, ...}|null,
      *     extra: array,
      *     id: string|null
      * } $marker

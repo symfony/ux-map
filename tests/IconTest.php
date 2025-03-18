@@ -63,4 +63,38 @@ class IconTest extends TestCase
     {
         self::assertEquals($icon, Icon::fromArray($expectedToArray));
     }
+
+    public static function dataProviderForTestSvgIconCustomizationMethodsCanNotBeCalled(): iterable
+    {
+        $refl = new \ReflectionClass(SvgIcon::class);
+        $customizationMethods = array_diff(
+            array_map(
+                fn (\ReflectionMethod $method) => $method->name,
+                array_filter($refl->getMethods(\ReflectionMethod::IS_PUBLIC), fn (\ReflectionMethod $method) => SvgIcon::class === $method->getDeclaringClass()->getName())
+            ),
+            ['toArray', 'fromArray']
+        );
+
+        foreach ($customizationMethods as $method) {
+            if (\in_array($method, ['width', 'height'], true)) {
+                yield $method => [$method, 12];
+            } elseif (\in_array($method, $customizationMethods, true)) {
+                throw new \LogicException(\sprintf('The "%s" method is not supposed to be called on the SvgIcon, please modify the test provider.', $method));
+            }
+        }
+    }
+
+    /**
+     * @dataProvider dataProviderForTestSvgIconCustomizationMethodsCanNotBeCalled
+     */
+    public function testSvgIconCustomizationMethodsCanNotBeCalled(string $method, mixed ...$args): void
+    {
+        $this->expectException(\LogicException::class);
+        if (\in_array($method, ['width', 'height'], true)) {
+            $this->expectExceptionMessage(\sprintf('Unable to configure the SvgIcon %s, please configure it in the HTML with the "%s" attribute on the root element instead.', $method, $method));
+        }
+
+        $icon = Icon::svg('<svg></svg>');
+        $icon->{$method}(...$args);
+    }
 }

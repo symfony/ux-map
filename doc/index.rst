@@ -141,15 +141,12 @@ Add Marker icons
 
 A ``Marker`` can be customized with an ``Icon`` instance, which can either be an UX Icon, an URL, or a SVG content::
 
-        // It can be a UX Icon (requires `symfony/ux-icons` package)
-        $icon = Icon::ux('fa:map-marker');
-        // Or an URL pointing to an image
-        $icon = Icon::url('https://example.com/marker.png');
-        // Or a plain SVG content
-        $icon = Icon::svg('<svg>(...)</svg>');
-
-        // Configure the icon size with the `width()` and `height()` methods
-        $icon = Icon::ux('fa:map-marker')->width(48)->height(48);
+        // It can be a UX Icon (requires `symfony/ux-icons` package)...
+        $icon = Icon::ux('fa:map-marker')->width(24)->height(24);
+        // ... or an URL pointing to an image
+        $icon = Icon::url('https://example.com/marker.png')->width(24)->height(24);
+        // ... or a plain SVG string
+        $icon = Icon::svg('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">...</svg>');
 
         $map->addMarker(new Marker(
             // ...

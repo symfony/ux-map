@@ -19,10 +19,7 @@ use Symfony\UX\Map\Renderer\RendererInterface;
 use Symfony\UX\Map\Tests\Kernel\TwigAppKernel;
 use Symfony\UX\Map\Twig\MapExtension;
 use Symfony\UX\Map\Twig\MapRuntime;
-use Twig\DeprecatedCallableInfo;
 use Twig\Environment;
-use Twig\Loader\ArrayLoader;
-use Twig\Loader\ChainLoader;
 
 class MapExtensionTest extends KernelTestCase
 {
@@ -48,43 +45,6 @@ class MapExtensionTest extends KernelTestCase
         $twig = self::getContainer()->get('twig');
 
         $this->assertInstanceOf(MapRuntime::class, $twig->getRuntime(MapRuntime::class));
-    }
-
-    /**
-     * @group legacy
-     */
-    public function testRenderFunctionIsDeprecated(): void
-    {
-        $map = (new Map())
-           ->center(new Point(latitude: 5, longitude: 10))
-           ->zoom(4);
-
-        $renderer = self::createMock(RendererInterface::class);
-        $renderer
-            ->expects(self::once())
-            ->method('renderMap')
-            ->with($map, [])
-            ->willReturn('<map/>')
-        ;
-        self::getContainer()->set('test.ux_map.renderers', $renderer);
-
-        /** @var Environment $twig */
-        $twig = self::getContainer()->get('twig');
-        $twig->setLoader(new ChainLoader([
-            new ArrayLoader([
-                'test' => '{{ render_map(map) }}',
-            ]),
-            $twig->getLoader(),
-        ]));
-
-        if (class_exists(DeprecatedCallableInfo::class)) {
-            $this->expectDeprecation('Since symfony/ux-map 2.20: Twig Function "render_map" is deprecated; use "ux_map" instead in test at line 1.');
-        } else {
-            $this->expectDeprecation('Twig Function "render_map" is deprecated since version 2.20. Use "ux_map" instead in test at line 1.');
-        }
-
-        $html = $twig->render('test', ['map' => $map]);
-        $this->assertSame('<map/>', $html);
     }
 
     public function testMapFunctionWithArray(): void

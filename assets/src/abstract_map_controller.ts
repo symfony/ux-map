@@ -206,7 +206,7 @@ export default abstract class<
     }): InfoWindow {
         this.dispatchEvent('info-window:before-create', { definition, element });
         const infoWindow = this.doCreateInfoWindow({ definition, element });
-        this.dispatchEvent('info-window:after-create', { infoWindow, element });
+        this.dispatchEvent('info-window:after-create', { infoWindow, definition, element });
 
         this.infoWindows.push(infoWindow);
 
@@ -334,7 +334,7 @@ export default abstract class<
         return ({ definition }: { definition: WithIdentifier<any> }) => {
             this.dispatchEvent(eventBefore, { definition });
             const drawing = factory({ definition }) as Draw;
-            this.dispatchEvent(eventAfter, { [type]: drawing });
+            this.dispatchEvent(eventAfter, { [type]: drawing, definition });
 
             draws.set(definition['@id'], drawing);
 

@@ -21,7 +21,8 @@ use Symfony\UX\Map\Exception\InvalidArgumentException;
 final class Polygon implements Element
 {
     /**
-     * @param array<string, mixed> $extra Extra data, can be used by the developer to store additional information and use them later JavaScript side
+     * @param array<Point>|array<array<Point>> $points A list of point representing the polygon, or a list of paths (each path is an array of points) representing a polygon with holes.
+     * @param array<string, mixed>             $extra  Extra data, can be used by the developer to store additional information and use them later JavaScript side
      */
     public function __construct(
         private readonly array $points,
@@ -36,7 +37,7 @@ final class Polygon implements Element
      * Convert the polygon to an array representation.
      *
      * @return array{
-     *     points: array<array{lat: float, lng: float}>,
+     *     points: array<array{lat: float, lng: float}>|array<array{lat: float, lng: float}>,
      *     title: string|null,
      *     infoWindow: array<string, mixed>|null,
      *     extra: array,
@@ -46,7 +47,9 @@ final class Polygon implements Element
     public function toArray(): array
     {
         return [
-            'points' => array_map(fn (Point $point) => $point->toArray(), $this->points),
+            'points' => current($this->points) instanceof Point
+                ? array_map(fn (Point $point) => $point->toArray(), $this->points)
+                : array_map(fn (array $path) => array_map(fn (Point $point) => $point->toArray(), $path), $this->points),
             'title' => $this->title,
             'infoWindow' => $this->infoWindow?->toArray(),
             'extra' => $this->extra,
@@ -56,7 +59,7 @@ final class Polygon implements Element
 
     /**
      * @param array{
-     *     points: array<array{lat: float, lng: float}>,
+     *     points: array<array{lat: float, lng: float}|array<array{lat: float, lng: float}>>,
      *     title: string|null,
      *     infoWindow: array<string, mixed>|null,
      *     extra: array,
@@ -70,7 +73,10 @@ final class Polygon implements Element
         if (!isset($polygon['points'])) {
             throw new InvalidArgumentException('The "points" parameter is required.');
         }
-        $polygon['points'] = array_map(Point::fromArray(...), $polygon['points']);
+
+        $polygon['points'] = isset($polygon['points'][0]['lat'], $polygon['points'][0]['lng'])
+            ? array_map(Point::fromArray(...), $polygon['points'])
+            : array_map(fn(array $points) => array_map(Point::fromArray(...), $points), $polygon['points']);
 
         if (isset($polygon['infoWindow'])) {
             $polygon['infoWindow'] = InfoWindow::fromArray($polygon['infoWindow']);

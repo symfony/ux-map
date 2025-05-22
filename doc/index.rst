@@ -71,7 +71,7 @@ Start by creating a new map instance::
     use Symfony\UX\Map\Map;
 
     // Create a new map instance
-    $myMap = (new Map());
+    $map = new Map();
 
 Center and zoom
 ~~~~~~~~~~~~~~~
@@ -81,7 +81,7 @@ You can set the center and zoom of the map using the ``center()`` and ``zoom()``
     use Symfony\UX\Map\Map;
     use Symfony\UX\Map\Point;
 
-    $myMap
+    $map
         // Explicitly set the center and zoom
         ->center(new Point(46.903354, 1.888334))
         ->zoom(6)
@@ -95,7 +95,7 @@ Add markers
 
 You can add markers to a map using the ``addMarker()`` method::
 
-    $myMap
+    $map
         ->addMarker(new Marker(
             position: new Point(48.8566, 2.3522),
             title: 'Paris'
@@ -154,7 +154,7 @@ Add Polygons
 
 You can also add Polygons, which represents an area enclosed by a series of ``Point`` instances::
 
-    $myMap->addPolygon(new Polygon(
+    $map->addPolygon(new Polygon(
         points: [
             new Point(48.8566, 2.3522),
             new Point(45.7640, 4.8357),
@@ -166,12 +166,37 @@ You can also add Polygons, which represents an area enclosed by a series of ``Po
         ),
     ));
 
+.. versionadded:: 2.26
+
+    `Polygon` with holes is available since UX Map 2.26.
+
+Since UX Map 2.26, you can also create polygons with holes in them, by passing an array of `array<Point>` to `points` parameter::
+
+    // Draw a polygon with a hole in it, on the French map
+    $map->addPolygon(new Polygon(points: [
+        // First path, the outer boundary of the polygon
+        [
+            new Point(48.117266, -1.677792), // Rennes
+            new Point(50.629250, 3.057256), // Lille
+            new Point(48.573405, 7.752111), // Strasbourg
+            new Point(43.296482, 5.369780), // Marseille
+            new Point(44.837789, -0.579180), // Bordeaux
+        ],
+        // Second path, it will make a hole in the previous one
+        [
+            new Point(45.833619, 1.261105), // Limoges
+            new Point(45.764043, 4.835659), // Lyon
+            new Point(49.258329, 4.031696), // Reims
+            new Point(48.856613, 2.352222), // Paris
+        ],
+    ]));
+
 Add Polylines
 ~~~~~~~~~~~~~
 
 You can add Polylines, which represents a path made by a series of ``Point`` instances::
 
-    $myMap->addPolyline(new Polyline(
+    $map->addPolyline(new Polyline(
         points: [
             new Point(48.8566, 2.3522),
             new Point(45.7640, 4.8357),

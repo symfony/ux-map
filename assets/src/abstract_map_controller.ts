@@ -48,7 +48,7 @@ export type MarkerDefinition<MarkerOptions, InfoWindowOptions> = WithIdentifier<
 
 export type PolygonDefinition<PolygonOptions, InfoWindowOptions> = WithIdentifier<{
     infoWindow?: InfoWindowWithoutPositionDefinition<InfoWindowOptions>;
-    points: Array<Point>;
+    points: Array<Point> | Array<Array<Point>>;
     title: string | null;
     /**
      * Raw options passed to the marker constructor, specific to the map provider (e.g.: `L.marker()` for Leaflet).

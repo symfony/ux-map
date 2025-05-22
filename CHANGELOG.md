@@ -1,5 +1,29 @@
 # CHANGELOG
 
+## 2.26
+
+-  Add support for creating `Polygon` with holes, by passing an array of `array<Point>` as `points` parameter to the `Polygon` constructor, e.g.:
+```php
+// Draw a polygon with a hole in it, on the French map
+$map->addPolygon(new Polygon(points: [
+    // First path, the outer boundary of the polygon
+    [
+        new Point(48.117266, -1.677792), // Rennes
+        new Point(50.629250, 3.057256), // Lille
+        new Point(48.573405, 7.752111), // Strasbourg
+        new Point(43.296482, 5.369780), // Marseille
+        new Point(44.837789, -0.579180), // Bordeaux
+    ],
+    // Second path, it will make a hole in the previous one
+    [
+        new Point(45.833619, 1.261105), // Limoges
+        new Point(45.764043, 4.835659), // Lyon
+        new Point(49.258329, 4.031696), // Reims
+        new Point(48.856613, 2.352222), // Paris
+    ],
+]));
+```
+
 ## 2.25
 
 -  Downgrade PHP requirement from 8.3 to 8.1

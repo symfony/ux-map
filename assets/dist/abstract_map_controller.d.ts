@@ -36,7 +36,7 @@ export type MarkerDefinition<MarkerOptions, InfoWindowOptions> = WithIdentifier<
 }>;
 export type PolygonDefinition<PolygonOptions, InfoWindowOptions> = WithIdentifier<{
     infoWindow?: InfoWindowWithoutPositionDefinition<InfoWindowOptions>;
-    points: Array<Point>;
+    points: Array<Point> | Array<Array<Point>>;
     title: string | null;
     rawOptions?: PolygonOptions;
     extra: Record<string, unknown>;

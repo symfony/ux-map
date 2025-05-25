@@ -57,7 +57,7 @@ final class Renderers implements RendererInterface
         return $renderer->renderMap($map, $attributes);
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         return implode(', ', array_keys($this->renderers));
     }

@@ -109,10 +109,6 @@ You can add markers to a map using the ``addMarker()`` method::
                 headerContent: '<b>Lyon</b>',
                 content: 'The French town in the historic Rhône-Alpes region, located at the junction of the Rhône and Saône rivers.'
             ),
-            icon: new Icon(
-                content: '<svg>....</svg>'
-                icontType: 'html'
-            )
         ))
 
         // You can also pass arbitrary data via the `extra` option in both the marker
